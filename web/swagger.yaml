@@ -1,0 +1,1007 @@
+openapi: 3.1.0
+info:
+  title: L.S.D API
+  description: |
+    # Large Search of Data API
+    
+    High-performance API for searching and managing billions of records across PostgreSQL and ClickHouse.
+    
+    ## Authentication
+    
+    The API supports two authentication methods:
+    
+    ### 1. JWT Bearer Token
+    Include your JWT token in the Authorization header:
+    ```
+    Authorization: Bearer <your_jwt_token>
+    ```
+    
+    ### 2. API Key
+    Include your API key in the X-API-Key header:
+    ```
+    X-API-Key: lsd_live_your_api_key_here
+    ```
+    
+    ## Rate Limits
+    
+    | Client Type | Rate Limit |
+    |-------------|------------|
+    | Anonymous | 100 req/min |
+    | Authenticated User | 1,000 req/min |
+    | AI Agent (API Key) | 5,000 req/min |
+    
+    ## Scopes
+    
+    - `read` - Read access to tables and records
+    - `write` - Write access (future use)
+    - `search` - Search across all tables
+    - `pipeline` - Access to pipeline endpoints
+    - `admin` - Full administrative access
+    
+  version: 2.0.0
+  contact:
+    name: L.S.D Support
+    url: https://github.com/Daveshvats/L.S.D
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:5000
+    description: Local development server
+  - url: https://api.lsd.local
+    description: Production server
+
+tags:
+  - name: Authentication
+    description: User authentication and API key management
+  - name: Tables
+    description: Table discovery and schema information
+  - name: Records
+    description: CRUD operations on table records
+  - name: Search
+    description: Full-text search across tables
+  - name: Pipeline
+    description: Data pipeline management
+  - name: CDC
+    description: Change Data Capture status
+
+security:
+  - BearerAuth: []
+  - ApiKeyAuth: []
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from /api/auth/login
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key with prefix lsd_live_
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "1"
+        email:
+          type: string
+          format: email
+          example: "user@example.com"
+        username:
+          type: string
+          example: "johndoe"
+        name:
+          type: string
+          example: "John Doe"
+        role:
+          type: string
+          enum: [user, admin, service]
+          example: "user"
+        createdAt:
+          type: string
+          format: date-time
+
+    APIKey:
+      type: object
+      properties:
+        id:
+          type: string
+        keyPrefix:
+          type: string
+          example: "lsd_live_abc12..."
+        name:
+          type: string
+          example: "Production Bot"
+        description:
+          type: string
+        scopes:
+          type: array
+          items:
+            type: string
+            enum: [read, write, search, pipeline, admin]
+          example: ["read", "search"]
+        rateLimit:
+          type: integer
+          example: 5000
+        lastUsedAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
+
+    LoginRequest:
+      type: object
+      required:
+        - identifier
+        - password
+      properties:
+        identifier:
+          type: string
+          description: Email or username
+          example: "user@example.com"
+        password:
+          type: string
+          format: password
+          example: "P@ssw0rd!"
+        rememberMe:
+          type: boolean
+          default: false
+          description: Extend session to 30 days
+
+    RegisterRequest:
+      type: object
+      required:
+        - username
+        - email
+        - password
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 30
+          pattern: '^[a-zA-Z0-9_]+$'
+          example: "johndoe"
+        email:
+          type: string
+          format: email
+          example: "user@example.com"
+        password:
+          type: string
+          format: password
+          description: Min 8 chars, must include uppercase, lowercase, number, and special char
+          example: "P@ssw0rd!"
+        name:
+          type: string
+          example: "John Doe"
+
+    CreateAPIKeyRequest:
+      type: object
+      required:
+        - name
+        - scopes
+      properties:
+        name:
+          type: string
+          example: "Production Bot"
+        description:
+          type: string
+          example: "API key for production automation"
+        scopes:
+          type: array
+          items:
+            type: string
+            enum: [read, write, search, pipeline, admin]
+          example: ["read", "search"]
+        rateLimit:
+          type: integer
+          minimum: 1
+          maximum: 50000
+          default: 1000
+          example: 5000
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Authentication required"
+
+    TableInfo:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "users"
+        schema:
+          type: string
+          example: "public"
+        columns:
+          type: integer
+          example: 15
+        primary_key:
+          type: array
+          items:
+            type: string
+          example: ["id"]
+        sortable:
+          type: array
+          items:
+            type: string
+        filterable:
+          type: array
+          items:
+            type: string
+        searchable:
+          type: array
+          items:
+            type: string
+        clickhouse_search:
+          type: boolean
+
+    SearchResult:
+      type: object
+      properties:
+        results:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: object
+        total_results:
+          type: integer
+        has_more:
+          type: boolean
+        next_cursor:
+          type: string
+        search_time:
+          type: integer
+          description: Search time in milliseconds
+        query:
+          type: string
+
+paths:
+  # ═══════════════════════════════════════════════════════════
+  # AUTHENTICATION ENDPOINTS
+  # ═══════════════════════════════════════════════════════════
+
+  /api/auth/register:
+    post:
+      tags: [Authentication]
+      summary: Register a new user
+      description: Create a new user account with email, username, and password
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '200':
+          description: Registration successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  accessToken:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid request or password requirements not met
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Email or username already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/login:
+    post:
+      tags: [Authentication]
+      summary: Login to your account
+      description: Authenticate with email/username and password
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  accessToken:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+          headers:
+            Set-Cookie:
+              description: HTTP-only cookies for access_token and refresh_token
+              schema:
+                type: string
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/logout:
+    post:
+      tags: [Authentication]
+      summary: Logout from current session
+      description: Revoke the current session and clear cookies
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+
+  /api/auth/me:
+    get:
+      tags: [Authentication]
+      summary: Get current user info
+      description: Returns the authenticated user's profile information
+      responses:
+        '200':
+          description: User information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/api-keys:
+    get:
+      tags: [Authentication]
+      summary: List all API keys
+      description: Get all API keys for the authenticated user
+      responses:
+        '200':
+          description: List of API keys
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  apiKeys:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/APIKey'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      tags: [Authentication]
+      summary: Create a new API key
+      description: Generate a new API key with specified scopes and rate limit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAPIKeyRequest'
+      responses:
+        '200':
+          description: API key created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  apiKey:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      key:
+                        type: string
+                        description: The full API key (only shown once!)
+                      keyPrefix:
+                        type: string
+                      name:
+                        type: string
+                      scopes:
+                        type: array
+                        items:
+                          type: string
+                      rateLimit:
+                        type: integer
+                  warning:
+                    type: string
+        '400':
+          description: Invalid scopes or request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/api-keys/{id}:
+    delete:
+      tags: [Authentication]
+      summary: Revoke an API key
+      description: Revoke (delete) an API key by its ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: API key ID
+      responses:
+        '200':
+          description: API key revoked
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+        '404':
+          description: API key not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ═══════════════════════════════════════════════════════════
+  # HEALTH CHECK
+  # ═══════════════════════════════════════════════════════════
+
+  /api/health:
+    get:
+      tags: [System]
+      summary: Health check
+      description: Check if the API is running and healthy
+      security: []
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "UP"
+                  service:
+                    type: string
+                    example: "L.S.D"
+                  tables_count:
+                    type: integer
+                  clickhouse:
+                    type: boolean
+                  redis:
+                    type: boolean
+
+  # ═══════════════════════════════════════════════════════════
+  # TABLES ENDPOINTS
+  # ═══════════════════════════════════════════════════════════
+
+  /api/tables:
+    get:
+      tags: [Tables]
+      summary: List all available tables
+      description: Get a list of all tables discovered in the database with their metadata
+      responses:
+        '200':
+          description: List of tables
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tables:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TableInfo'
+                  count:
+                    type: integer
+
+  /api/tables/{table}/schema:
+    get:
+      tags: [Tables]
+      summary: Get table schema
+      description: Get detailed schema information for a specific table
+      parameters:
+        - name: table
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Table name
+      responses:
+        '200':
+          description: Table schema
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  schema:
+                    type: string
+                  columns:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        dataType:
+                          type: string
+                        nullable:
+                          type: boolean
+                  primary_key:
+                    type: array
+                    items:
+                      type: string
+                  indexes:
+                    type: array
+                    items:
+                      type: object
+        '404':
+          description: Table not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/tables/{table}/records:
+    get:
+      tags: [Records]
+      summary: Get records from a table
+      description: Retrieve records from a table with pagination, filtering, and sorting
+      parameters:
+        - name: table
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 50
+        - name: cursor
+          in: query
+          schema:
+            type: string
+          description: Pagination cursor
+        - name: sort_by
+          in: query
+          schema:
+            type: string
+        - name: sort_dir
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+      responses:
+        '200':
+          description: Records
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                  next_cursor:
+                    type: string
+                  has_more:
+                    type: boolean
+                  count:
+                    type: integer
+                  table:
+                    type: string
+                  cached:
+                    type: boolean
+
+  /api/tables/{table}/records/{pk}:
+    get:
+      tags: [Records]
+      summary: Get a single record by primary key
+      parameters:
+        - name: table
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pk
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Single record
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: Record not found
+
+  /api/tables/{table}/search:
+    get:
+      tags: [Search]
+      summary: Search within a table
+      description: Full-text search within a specific table
+      parameters:
+        - name: table
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 100
+          description: Search term
+        - name: columns
+          in: query
+          schema:
+            type: string
+          description: Comma-separated list of columns to search
+        - name: engine
+          in: query
+          schema:
+            type: string
+            enum: [clickhouse, postgresql]
+          description: Force a specific search engine
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                  next_cursor:
+                    type: string
+                  has_more:
+                    type: boolean
+                  count:
+                    type: integer
+                  table:
+                    type: string
+                  search_columns:
+                    type: array
+                    items:
+                      type: string
+                  search_engine:
+                    type: string
+                    enum: [clickhouse, postgresql]
+
+  /api/tables/{table}/stats:
+    get:
+      tags: [Tables]
+      summary: Get table statistics
+      parameters:
+        - name: table
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Table statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  table_name:
+                    type: string
+                  estimated_rows:
+                    type: integer
+                  table_size:
+                    type: string
+                  index_size:
+                    type: string
+                  clickhouse_indexed:
+                    type: integer
+                  clickhouse_last_sync:
+                    type: string
+                    format: date-time
+
+  # ═══════════════════════════════════════════════════════════
+  # GLOBAL SEARCH
+  # ═══════════════════════════════════════════════════════════
+
+  /api/search/:
+    get:
+      tags: [Search]
+      summary: Global search across all tables
+      description: |
+        Optimized full-text search across all indexed tables using ClickHouse bitmap indexing.
+        This is the fastest way to search billions of records.
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 100
+          description: Search term
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: cursor
+          in: query
+          schema:
+            type: string
+          description: Pagination cursor
+      responses:
+        '200':
+          description: Search results grouped by table
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResult'
+        '503':
+          description: ClickHouse not available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ═══════════════════════════════════════════════════════════
+  # PIPELINE ENDPOINTS
+  # ═══════════════════════════════════════════════════════════
+
+  /api/pipeline/start:
+    post:
+      tags: [Pipeline]
+      summary: Start a pipeline job
+      description: Start a new data pipeline job to process CSV files
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - file_path
+                - table_name
+              properties:
+                file_path:
+                  type: string
+                  description: Path to the CSV file
+                table_name:
+                  type: string
+                  description: Target table name
+                options:
+                  type: object
+                  properties:
+                    delimiter:
+                      type: string
+                      default: ","
+                    has_header:
+                      type: boolean
+                      default: true
+                    batch_size:
+                      type: integer
+                      default: 10000
+      responses:
+        '200':
+          description: Job started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: string
+                  status:
+                    type: string
+                  message:
+                    type: string
+
+  /api/pipeline/jobs:
+    get:
+      tags: [Pipeline]
+      summary: List all pipeline jobs
+      responses:
+        '200':
+          description: List of jobs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jobs:
+                    type: array
+                    items:
+                      type: object
+
+  /api/pipeline/jobs/{job_id}:
+    get:
+      tags: [Pipeline]
+      summary: Get job status
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Job status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: string
+                  status:
+                    type: string
+                    enum: [pending, running, completed, failed]
+                  progress:
+                    type: integer
+                  total:
+                    type: integer
+                  error:
+                    type: string
+
+  /api/pipeline/jobs/{job_id}/logs:
+    get:
+      tags: [Pipeline]
+      summary: Get job logs
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Job logs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  logs:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        time:
+                          type: string
+                        level:
+                          type: string
+                        message:
+                          type: string
+
+  /api/pipeline/jobs/{job_id}/stream:
+    get:
+      tags: [Pipeline]
+      summary: Stream job progress
+      description: Server-sent events stream for real-time job progress
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: SSE stream
+          content:
+            text/event-stream:
+              schema:
+                type: string
+
+  # ═══════════════════════════════════════════════════════════
+  # CDC ENDPOINTS
+  # ═══════════════════════════════════════════════════════════
+
+  /api/cdc/status:
+    get:
+      tags: [CDC]
+      summary: Get CDC status
+      description: Get the current status of Change Data Capture synchronization
+      responses:
+        '200':
+          description: CDC status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  is_running:
+                    type: boolean
+                  available:
+                    type: boolean
+                  total_tables:
+                    type: integer
+                  table_statuses:
+                    type: object
+                    additionalProperties:
+                      type: object
+                      properties:
+                        last_sync:
+                          type: string
+                          format: date-time
+                        records_synced:
+                          type: integer
+                        status:
+                          type: string
