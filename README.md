@@ -1,17 +1,14 @@
 <div align="center">
 
-# 🔍 L.S.D
+🔍 L.S.D
 
-**Large Search of Data**
+Large Search of Data
 
 *A production-grade, high-performance API that automatically adapts to any PostgreSQL database schema*
 
-[![GitHub stars](https://img.shields.io/github/stars/Daveshvats/L.S.D?style=for-the-badge&logo=github&color=yellow)](https://github.com/Daveshvats/L.S.D/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/Daveshvats/L.S.D?style=for-the-badge&logo=github&color=blue)](https://github.com/Daveshvats/L.S.D/fork)
-[![GitHub issues](https://img.shields.io/github/issues/Daveshvats/L.S.D?style=for-the-badge&logo=github&color=red)](https://github.com/Daveshvats/L.S.D/issues)
+
+
 [![Go Version](https://img.shields.io/badge/Go-1.24+-00ADD8?style=for-the-badge&logo=go)](https://go.dev/)
-[![License](https://img.shields.io/github/license/Daveshvats/L.S.D?style=for-the-badge&color=green)](LICENSE)
-[![Last Commit](https://img.shields.io/github/last-commit/Daveshvats/L.S.D?style=for-the-badge&color=orange)](https://github.com/Daveshvats/L.S.D/commits/main)
 
 [🚀 Quick Start](#-quick-start) · [📖 Documentation](docs/architecture.md) · [🎮 Demo](#-use-cases--real-world-scenarios) · [🤝 Contributing](#-contributing)
 
@@ -19,13 +16,13 @@
 
 ---
 
-## 🎯 What is L.S.D?
+🎯 What is L.S.D?
 
 **L.S.D (Large Search of Data)** is a dynamic, schema-agnostic Go API that transforms any PostgreSQL database into a fully-functional REST API with blazing-fast search capabilities. Designed for massive datasets (2-4 TB), it auto-discovers your database schema at runtime and provides optimized endpoints for data access, search, and management—without writing a single line of backend code.
 
 Whether you're building a web GUI, Telegram bot, WhatsApp integration, or need sub-second search across billions of rows, L.S.D has you covered with automatic ClickHouse integration and intelligent caching.
 
-## ✨ Key Features
+✨ Key Features
 
 | Feature | Description |
 |---------|-------------|
@@ -40,7 +37,7 @@ Whether you're building a web GUI, Telegram bot, WhatsApp integration, or need s
 | 🌐 **Swagger/OpenAPI** | Complete API documentation with interactive UI |
 | 🎨 **Web Dashboard** | Beautiful, responsive admin dashboard included |
 
-## 🏗️ High-Level Architecture
+ 🏗️ High-Level Architecture
 
 ```mermaid
 graph TB
@@ -89,16 +86,16 @@ graph TB
     style REDIS fill:#dc382d,color:#fff
 ```
 
-## 🚀 Quick Start
+🚀 Quick Start
 
-### Prerequisites
+# Prerequisites
 
 - **Go 1.24+** installed
 - **PostgreSQL 15+** running
 - **Redis** (optional, for caching)
 - **ClickHouse** (optional, for accelerated search)
 
-### Installation
+Installation
 
 ```bash
 # Clone the repository
@@ -112,7 +109,7 @@ cp .env.example .env
 # DATABASE_URL=postgresql://user:password@localhost:5432/your_db
 ```
 
-### Run the Server
+# Run the Server
 
 ```bash
 # Start Redis (if using caching)
@@ -124,7 +121,7 @@ go run ./cmd/api
 
 The API will be available at `http://localhost:5000`
 
-### First API Call
+# First API Call
 
 ```bash
 # List all discovered tables
@@ -139,7 +136,7 @@ curl "http://localhost:5000/api/tables/your_table/search?q=search_term"
 
 ## 📊 API Endpoints Overview
 
-### Dynamic REST API
+# Dynamic REST API
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
@@ -152,7 +149,7 @@ curl "http://localhost:5000/api/tables/your_table/search?q=search_term"
 | `/api/cdc/status` | GET | CDC pipeline sync status |
 | `/api/health` | GET | Health check endpoint |
 
-### Authentication
+# Authentication
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
@@ -162,35 +159,35 @@ curl "http://localhost:5000/api/tables/your_table/search?q=search_term"
 | `/api/auth/logout` | POST | Logout and revoke session |
 | `/api/api-keys` | GET/POST | Manage API keys |
 
-### Webhooks
+# Webhooks
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/webhook/telegram` | POST | Telegram bot webhook |
 | `/webhook/whatsapp` | GET/POST | WhatsApp bot webhook |
 
-## 🎮 Use Cases & Real-World Scenarios
+# 🎮 Use Cases & Real-World Scenarios
 
-### 1. Enterprise Data Portal
+# 1. Enterprise Data Portal
 Expose legacy PostgreSQL databases to modern web applications without writing custom APIs. L.S.D automatically handles schema changes—just add new tables or columns, and they're instantly available.
 
-### 2. AI Agent Integration
+# 2. AI Agent Integration
 Use API keys with scoped permissions to let AI agents search and retrieve data safely:
 ```bash
 curl -H "X-API-Key: lsd_live_your_key" \
   "http://localhost:5000/api/tables/customers/search?q=john"
 ```
 
-### 3. Real-Time Analytics Dashboard
+# 3. Real-Time Analytics Dashboard
 Combine PostgreSQL's transactional integrity with ClickHouse's analytical speed. The CDC pipeline keeps search indexes fresh every 30 seconds.
 
-### 4. Multi-Platform Bot Backend
+# 4. Multi-Platform Bot Backend
 Serve Telegram and WhatsApp bots from the same API. Built-in command handlers for `/list`, `/search`, `/get`, and `/stats`.
 
-### 5. Data Migration Tooling
+# 5. Data Migration Tooling
 Use the dynamic API to extract data from any PostgreSQL database without writing migration scripts—perfect for ETL pipelines and data synchronization tasks.
 
-## 📖 Documentation
+# 📖 Documentation
 
 | Document | Description |
 |----------|-------------|
@@ -201,7 +198,7 @@ Use the dynamic API to extract data from any PostgreSQL database without writing
 | [Deployment Guide](docs/deployment.md) | Production deployment strategies |
 | [FAQ](docs/faq.md) | Frequently asked questions |
 
-## 🛠️ Tech Stack
+# 🛠️ Tech Stack
 
 <p align="center">
   <img src="https://img.shields.io/badge/Go-00ADD8?style=flat-square&logo=go&logoColor=white" alt="Go"/>
@@ -221,55 +218,39 @@ Use the dynamic API to extract data from any PostgreSQL database without writing
 | Frontend | Vanilla JS + HTML | Web dashboard |
 | API Docs | OpenAPI 3.1 | Interactive documentation |
 
-## 🗺️ Roadmap
 
-- [x] Dynamic schema discovery
-- [x] Cursor-based pagination
-- [x] ClickHouse integration
-- [x] CDC pipeline
-- [x] Authentication system
-- [x] API key management
-- [ ] GraphQL endpoint
-- [ ] WebSocket real-time updates
-- [ ] Admin panel enhancements
-- [ ] Kubernetes Helm charts
-- [ ] Multi-database support
-- [ ] Query builder UI
 
-## 🤝 Contributing
+# 🤝 Contributing
 
 We welcome contributions! Here's how to get started:
 
-1. **Fork** the repository
-2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
-3. **Commit** your changes (`git commit -m 'Add amazing feature'`)
-4. **Push** to the branch (`git push origin feature/amazing-feature`)
-5. **Open** a Pull Request
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 Please read our [Development Guide](docs/development.md) for coding standards and best practices.
 
-### Contributors
+# Contributors
 
-<a href="https://github.com/Daveshvats/L.S.D/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=Daveshvats/L.S.D" />
+<a href="https://github.com/vinayyadav36">
 </a>
 
-## 📜 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 💬 Community & Support
+# 💬 Community & Support
 
-- **Issues**: [GitHub Issues](https://github.com/Daveshvats/L.S.D/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/Daveshvats/L.S.D/discussions)
+- **Issues**: [GitHub Issues](https://github.com/vinayyadav36)
+- **Discussions**: [GitHub Discussions](https://linkedin.com/in/vinay-yadav-dev)
 
 ---
 
 <div align="center">
 
-**Made with ❤️ by the L.S.D Team**
+*Made with Time by the SH Team*
 
-*Star ⭐ this repo if you find it useful!*
+
 
 [⬆ Back to Top](#-lsd)
 
