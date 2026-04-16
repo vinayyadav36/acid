@@ -119,19 +119,19 @@ redis-server --daemonize yes --port 6379
 go run ./cmd/api
 ```
 
-The API will be available at `http://localhost:5000`
+The API will be available at `http://localhost:8080`
 
 # First API Call
 
 ```bash
 # List all discovered tables
-curl http://localhost:5000/api/tables
+curl http://localhost:8080/api/tables
 
 # Get records from a table
-curl "http://localhost:5000/api/tables/your_table/records?limit=10"
+curl "http://localhost:8080/api/tables/your_table/records?limit=10"
 
 # Search across a table
-curl "http://localhost:5000/api/tables/your_table/search?q=search_term"
+curl "http://localhost:8080/api/tables/your_table/search?q=search_term"
 ```
 
 ## 📊 API Endpoints Overview
@@ -157,7 +157,7 @@ curl "http://localhost:5000/api/tables/your_table/search?q=search_term"
 | `/api/auth/login` | POST | Login and get JWT token |
 | `/api/auth/refresh` | POST | Refresh access token |
 | `/api/auth/logout` | POST | Logout and revoke session |
-| `/api/api-keys` | GET/POST | Manage API keys |
+| `/api/auth/api-keys` | GET/POST | Manage API keys |
 
 # Webhooks
 
@@ -175,7 +175,7 @@ Expose legacy PostgreSQL databases to modern web applications without writing cu
 Use API keys with scoped permissions to let AI agents search and retrieve data safely:
 ```bash
 curl -H "X-API-Key: lsd_live_your_key" \
-  "http://localhost:5000/api/tables/customers/search?q=john"
+  "http://localhost:8080/api/tables/customers/search?q=john"
 ```
 
 # 3. Real-Time Analytics Dashboard

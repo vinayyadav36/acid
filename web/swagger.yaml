@@ -41,16 +41,14 @@ info:
   version: 2.0.0
   contact:
     name: L.S.D Support
-    url: https://github.com/Daveshvats/L.S.D
+    url: https://github.com/vinayyadav36/acid
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
 
 servers:
-  - url: http://localhost:5000
+  - url: http://localhost:8080
     description: Local development server
-  - url: https://api.lsd.local
-    description: Production server
 
 tags:
   - name: Authentication

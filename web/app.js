@@ -25,16 +25,19 @@ async function loadTables() {
             select.appendChild(option);
         }
         
-        await loadHealthStatus();
-        await loadCDCStatus();
     } catch (error) {
         console.error('Error loading tables:', error);
+    } finally {
+        await Promise.allSettled([
+            loadHealthStatus(),
+            loadCDCStatus(),
+        ]);
     }
 }
 
 async function loadHealthStatus() {
     try {
-        const response = await fetch('/health');
+        const response = await fetch('/api/health');
         const health = await response.json();
         
         clickhouseAvailable = health.clickhouse || false;
@@ -165,7 +168,7 @@ async function loadRecords() {
         
         let url = `/api/tables/${currentTable}/records?limit=20`;
         if (currentCursor) url += `&cursor=${currentCursor}`;
-        if (sortBy) url += `&sort=${sortBy}&order=${sortOrder}`;
+        if (sortBy) url += `&sort_by=${sortBy}&sort_dir=${sortOrder}`;
         
         const response = await fetch(url);
         const data = await response.json();
@@ -208,7 +211,7 @@ async function searchRecords() {
         
         const searchSpeed = document.getElementById('search-speed');
         const time = (endTime - startTime).toFixed(2);
-        const engineUsed = data.engine || engine || 'unknown';
+        const engineUsed = data.search_engine || data.engine || engine || 'unknown';
         searchSpeed.innerHTML = `Search completed in <span class="${engineUsed === 'clickhouse' ? 'search-fast' : 'search-pg'}">${time}ms</span> using <strong>${engineUsed}</strong>`;
         
         document.getElementById('page-info').textContent = `${data.count || data.results?.length || 0} results found`;
