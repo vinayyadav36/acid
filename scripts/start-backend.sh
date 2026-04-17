@@ -53,9 +53,9 @@ echo -e "${BLUE}╚════════════════════�
 echo -e ""
 
 ts() { date '+%Y-%m-%d %H:%M:%S'; }
-info()  { echo -e "[$(ts())] ${GREEN}[BACKEND INFO]${RESET}  $*"; }
-warn()  { echo -e "[$(ts())] ${YELLOW}[BACKEND WARN]${RESET}  $*"; }
-error() { echo -e "[$(ts())] ${RED}[BACKEND ERROR]${RESET} $*"; }
+info()  { echo -e "[$(ts)] ${GREEN}[BACKEND INFO]${RESET}  $*"; }
+warn()  { echo -e "[$(ts)] ${YELLOW}[BACKEND WARN]${RESET}  $*"; }
+error() { echo -e "[$(ts)] ${RED}[BACKEND ERROR]${RESET} $*"; }
 
 # ── Prerequisites ─────────────────────────────────────────────────────────────
 command -v go >/dev/null 2>&1 || { error "Go is not installed. Install from https://go.dev"; exit 1; }
