@@ -6,7 +6,7 @@ setlocal
 set BASE_URL=http://localhost:8080
 
 echo [INFO] Checking backend at %BASE_URL%/api/health ...
-powershell -NoProfile -Command "try { $r = Invoke-WebRequest -UseBasicParsing '%BASE_URL%/api/health' -TimeoutSec 3; if ($r.StatusCode -ge 200 -and $r.StatusCode -lt 500) { exit 0 } else { exit 1 } } catch { exit 1 }"
+powershell -NoProfile -Command "try { $r = Invoke-WebRequest -UseBasicParsing '%BASE_URL%/api/health' -TimeoutSec 3; if ($r.StatusCode -ge 200 -and $r.StatusCode -lt 300) { exit 0 } else { exit 1 } } catch { exit 1 }"
 
 if %ERRORLEVEL% neq 0 (
     echo [ERROR] Backend is not running.

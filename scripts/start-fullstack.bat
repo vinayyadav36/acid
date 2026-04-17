@@ -15,7 +15,7 @@ start "L.S.D Backend" cmd /c "%~dp0start-backend.bat"
 echo [INFO] Waiting for backend health endpoint ...
 :wait_loop
 set /a RETRY+=1
-powershell -NoProfile -Command "try { $r = Invoke-WebRequest -UseBasicParsing '%BASE_URL%/api/health' -TimeoutSec 3; if ($r.StatusCode -ge 200 -and $r.StatusCode -lt 500) { exit 0 } else { exit 1 } } catch { exit 1 }"
+powershell -NoProfile -Command "try { $r = Invoke-WebRequest -UseBasicParsing '%BASE_URL%/api/health' -TimeoutSec 3; if ($r.StatusCode -ge 200 -and $r.StatusCode -lt 300) { exit 0 } else { exit 1 } } catch { exit 1 }"
 
 if %ERRORLEVEL% equ 0 goto ready
 if %RETRY% geq %MAX_RETRIES% goto timeout
