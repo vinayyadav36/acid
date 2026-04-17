@@ -184,6 +184,46 @@ a:hover {
 }
 
 /* ============================================
+   Layer Role Badges — Backend / Frontend
+   Visible in the nav bar so operators can
+   immediately identify which layer they are
+   looking at.
+   ============================================ */
+.role-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--radius-full);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    pointer-events: none;
+    flex-shrink: 0;
+}
+
+.role-badge-backend {
+    background: rgba(14, 165, 233, 0.18);
+    color: #38bdf8;
+    border: 1px solid rgba(14, 165, 233, 0.35);
+}
+
+.role-badge-frontend {
+    background: rgba(168, 85, 247, 0.18);
+    color: #c084fc;
+    border: 1px solid rgba(168, 85, 247, 0.35);
+}
+
+.role-badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: pulse 2s infinite;
+}
+
+/* ============================================
    Navigation
    ============================================ */
 nav {

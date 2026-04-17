@@ -400,13 +400,17 @@ func main() {
 	handler = middleware.Logger(handler)
 	// #forensic: AuditLogger records every request to entity_access_logs
 	handler = middleware.AuditLogger(pool.Pool)(handler)
+	// #safety: Recovery MUST be outermost — catches any panic that escapes a handler
+	handler = middleware.Recovery(handler)
 
 	server := &http.Server{
-		Addr:         fmt.Sprintf(":%s", cfg.Port),
-		Handler:      handler,
-		ReadTimeout:  15 * time.Second,
-		WriteTimeout: 15 * time.Second,
-		IdleTimeout:  60 * time.Second,
+		Addr:              fmt.Sprintf(":%s", cfg.Port),
+		Handler:           handler,
+		ReadTimeout:       30 * time.Second,
+		ReadHeaderTimeout: 10 * time.Second,
+		WriteTimeout:      60 * time.Second,
+		IdleTimeout:       120 * time.Second,
+		MaxHeaderBytes:    1 << 20, // 1 MB
 	}
 
 	go func() {
