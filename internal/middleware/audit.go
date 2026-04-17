@@ -73,7 +73,7 @@ func AuditLogger(pool *pgxpool.Pool) func(http.Handler) http.Handler {
 			userID := ""
 			username := ""
 			if userCtx != nil {
-				userID = fmt.Sprintf("%d", userCtx.UserID)
+				userID = userCtx.UserID
 				username = userCtx.Username
 			}
 
