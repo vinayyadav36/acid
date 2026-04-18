@@ -411,6 +411,16 @@ const ReportNumTablesPerDB = 1000
 const ReportUsersPerTable = 50
 
 func (h *ReportHandler) GenerateSystemReport(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Minute)
+	defer cancel()
+
+	select {
+	case <-ctx.Done():
+		h.writeError(w, http.StatusRequestTimeout, "request timed out")
+		return
+	default:
+	}
+
 	reportFormat := r.URL.Query().Get("format")
 	if reportFormat == "" {
 		reportFormat = "csv"
