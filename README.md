@@ -1,275 +1,337 @@
+# 🔬 ACID - Advanced Database Interface System
+
 <div align="center">
 
-🔍 L.S.D
-
-Large Search of Data
-
-*A production-grade, high-performance API that automatically adapts to any PostgreSQL database schema*
-
-
+**A production-grade, high-performance API that automatically adapts to any PostgreSQL database**
 
 [![Go Version](https://img.shields.io/badge/Go-1.24+-00ADD8?style=for-the-badge&logo=go)](https://go.dev/)
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
-[🚀 Quick Start](#-quick-start) · [📖 Documentation](docs/architecture.md) · [🎮 Demo](#-use-cases--real-world-scenarios) · [🤝 Contributing](#-contributing)
+[🚀 Quick Start](#quick-start) · [📖 User Guide](docs/README-FOR-USERS.md) · [⚙️ Configuration](docs/configuration.md) · [🎮 Demo](#features)
 
 </div>
 
 ---
 
-🎯 What is L.S.D?
+## 📋 What is ACID?
 
-**L.S.D (Large Search of Data)** is a dynamic, schema-agnostic Go API that transforms any PostgreSQL database into a fully-functional REST API with blazing-fast search capabilities. Designed for massive datasets (2-4 TB), it auto-discovers your database schema at runtime and provides optimized endpoints for data access, search, and management—without writing a single line of backend code.
+**ACID (Advanced Database Interface System)** is a powerful system that gives you a beautiful web interface to manage your PostgreSQL database - without writing any code!
 
-Whether you're building a web GUI, Telegram bot, WhatsApp integration, or need sub-second search across billions of rows, L.S.D has you covered with automatic ClickHouse integration and intelligent caching.
+Think of it like this:
+- **PostgreSQL** = Your filing cabinet (where all data is stored)
+- **ACID** = A smart assistant that helps you find, organize, and manage files
+- **ClickHouse** = A super-fast search engine that finds anything instantly
+- **Redis** = Sticky notes for faster access
 
-✨ Key Features
+---
 
-| Feature | Description |
+## ✨ Features
+
+| Feature | What It Does |
 |---------|-------------|
-| 🔮 **Dynamic Schema Discovery** | Auto-discovers tables, columns, primary keys, and indexes at startup—no manual configuration needed |
-| ⚡ **Keyset Pagination** | O(1) cursor-based pagination that stays fast regardless of dataset size |
-| 🚄 **ClickHouse Integration** | Sub-second multi-column text search on billions of rows using ngram indexes |
-| 🔄 **CDC Pipeline** | Automatic PostgreSQL → ClickHouse synchronization with delete handling |
-| 📦 **Redis Caching** | Built-in caching layer with configurable TTL for lightning-fast responses |
-| 🔐 **Authentication** | JWT-based auth with API key support for AI agents and integrations |
-| 📊 **Rate Limiting** | Configurable per-client rate limiting (100-5000 req/min) |
-| 🤖 **Bot Support** | Ready-to-use Telegram and WhatsApp webhook handlers |
-| 🌐 **Swagger/OpenAPI** | Complete API documentation with interactive UI |
-| 🎨 **Web Dashboard** | Beautiful, responsive admin dashboard included |
+| 🔮 **Auto-Discovery** | Automatically finds all your database tables - no setup needed! |
+| ⚡ **Fast Search** | Searches billions of records in milliseconds using ClickHouse |
+| 🎨 **Admin Panel** | Beautiful web interface at `/admin` |
+| 📊 **Reports** | Download data as CSV, JSON, or PDF |
+| 🔐 **Security** | JWT authentication, rate limiting, audit logging |
+| 🔄 **CDC Sync** | Automatically syncs data to search engine |
+| 📦 **Caching** | Redis caching for lightning-fast responses |
 
- 🏗️ High-Level Architecture
+---
 
-```mermaid
-graph TB
-    subgraph Clients
-        WEB[Web Dashboard]
-        TG[Telegram Bot]
-        WA[WhatsApp Bot]
-        API[API Consumers]
-    end
+## 🚀 Quick Start
 
-    subgraph "L.S.D API Server"
-        AUTH[Auth Middleware]
-        RATE[Rate Limiter]
-        CACHE[Redis Cache]
-        SCHEMA[Schema Discovery]
-        HANDLERS[Dynamic Handlers]
-        SEARCH[Search Engine]
-    end
-
-    subgraph Datastores
-        PG[(PostgreSQL<br/>Primary DB)]
-        CH[(ClickHouse<br/>Search Index)]
-        REDIS[(Redis<br/>Cache)]
-    end
-
-    WEB --> AUTH
-    TG --> AUTH
-    WA --> AUTH
-    API --> AUTH
-
-    AUTH --> RATE
-    RATE --> HANDLERS
-    HANDLERS --> SCHEMA
-    HANDLERS --> CACHE
-    HANDLERS --> SEARCH
-
-    SCHEMA --> PG
-    CACHE --> REDIS
-    SEARCH --> CH
-    SEARCH -.->|Fallback| PG
-
-    PG -.->|CDC Sync| CH
-
-    style PG fill:#336791,color:#fff
-    style CH fill:#ffcc00,color:#000
-    style REDIS fill:#dc382d,color:#fff
-```
-
-🚀 Quick Start
-
-# Prerequisites
-
-- Go 1.24+ installed
-- PostgreSQL 15+ running
-- Redis (optional, for caching)
-- ClickHouse (optional, for accelerated search)
-
-Installation
+### Option 1: Docker (Recommended)
 
 ```bash
-# Clone the repository
-git clone https://github.com/vinayyadav36/acid
+# 1. Clone the project
+git clone <this-repo>
 cd acid
 
-# Copy environment configuration
+# 2. Copy configuration
 cp .env.example .env
 
-# Edit .env with your database credentials
-# DATABASE_URL=postgresql://user:password@localhost:5432/your_db
+# 3. Edit .env with your database details
+nano .env
+
+# 4. Start everything
+docker-compose up -d
+
+# 5. Open your browser
+#    Admin Panel: http://localhost:8080/admin
+#    API Docs:     http://localhost:8080/docs
 ```
 
-# Run the Server
+### Option 2: Manual Setup
 
 ```bash
-# Start Redis (if using caching)
-redis-server --daemonize yes --port 6379
+# 1. Install prerequisites
+#    - Go 1.24+
+#    - PostgreSQL 15+
+#    - Redis (optional)
+#    - ClickHouse (optional for fast search)
 
-# Run the API server
+# 2. Clone and enter project
+git clone <this-repo>
+cd acid
+
+# 3. Copy configuration
+cp .env.example .env
+
+# 4. Edit .env with your database URL
+#    DATABASE_URL=postgres://user:password@localhost:5432/yourdb
+
+# 5. Download dependencies
+go mod download
+
+# 6. Run the server
 go run ./cmd/api
+
+# 7. Open browser
+#    http://localhost:8080/admin
 ```
 
-The API will be available at `http://localhost:8080`
+---
 
-### Windows one-click startup (beginner-friendly)
+## 🌐 Access Points
 
-- **Single menu (best for new users)**: `scripts\start-menu.bat`
-- **Backend only**: `scripts\start-backend.bat`
-- **Frontend only (opens UI, requires backend already running)**: `scripts\start-frontend.bat`
-- **Full stack (starts backend, waits for health, then opens frontend)**: `scripts\start-fullstack.bat`
+Once running, access these URLs:
 
-Frontend files live in `/web`, but they are served by the Go backend on the same port.
+| URL | Purpose |
+|-----|---------|
+| [`http://localhost:8080/admin`](http://localhost:8080/admin) | **Complete Admin Panel** - Use this! |
+| [`http://localhost:8080/`](http://localhost:8080/) | Home page |
+| [`http://localhost:8080/login`](http://localhost:8080/login) | User login |
+| [`http://localhost:8080/register`](http://localhost:8080/register) | Create account |
+| [`http://localhost:8080/docs`](http://localhost:8080/docs) | API Documentation |
+| [`http://localhost:8080/api/health`](http://localhost:8080/api/health) | Health check |
 
-### Database workspace (organized for new contributors)
+---
 
-- Store SQL files in `/databases` only
-- Use `scripts\database-manager.bat` to list/apply files
-- Quick commands:
-  - `scripts\database-manager.bat list`
-  - `scripts\database-manager.bat apply databases\migrations\001_example.sql`
-  - `scripts\database-manager.bat apply-all migrations`
+## 📖 User Guide
 
-# First API Call
+For detailed instructions on using ACID, see [📖 User Guide](docs/README-FOR-USERS.md)
+
+### What can you do in the Admin Panel?
+
+1. **📊 Dashboard** - See overview of all databases, tables, records
+2. **📋 Tables** - Browse and search any table
+3. **🔍 Search** - Global search across ALL tables at once
+4. **🗄️ Databases** - Manage multiple databases
+5. **📄 Reports** - Download data in CSV/JSON/PDF format
+6. **👥 Users** - Manage user accounts
+7. **⚙️ Settings** - Configure system settings
+
+---
+
+## ⚙️ Configuration
+
+All configuration is in the `.env` file. Key options:
 
 ```bash
-# List all discovered tables
-curl http://localhost:8080/api/tables
+# Server
+PORT=8080
 
-# Get records from a table
-curl "http://localhost:8080/api/tables/your_table/records?limit=10"
+# Database (Required)
+DATABASE_URL=postgres://user:password@host:5432/dbname
 
-# Search across a table
-curl "http://localhost:8080/api/tables/your_table/search?q=search_term"
+# Redis (Optional - for caching)
+REDIS_ADDR=localhost:6379
+REDIS_PASSWORD=
+
+# ClickHouse (Optional - for fast search)
+CLICKHOUSE_ADDR=localhost:9000
+CLICKHOUSE_DB=acid
+CLICKHOUSE_USER=default
+CLICKHOUSE_PASSWORD=
+
+# Security
+JWT_SECRET=change-this-in-production
+
+# Features
+ENABLE_CDC=true
+ENABLE_DB_SEARCH=true
 ```
 
-## 📊 API Endpoints Overview
+See [Configuration Guide](docs/configuration.md) for all options.
 
-# Dynamic REST API
+---
 
+## 🔌 API Endpoints
+
+### Authentication
 | Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/tables` | GET | List all discovered tables |
-| `/api/tables/{table}/schema` | GET | Get table schema and columns |
-| `/api/tables/{table}/records` | GET | List records with cursor pagination |
-| `/api/tables/{table}/records/{pk}` | GET | Get single record by primary key |
-| `/api/tables/{table}/search` | GET | Multi-column text search |
-| `/api/tables/{table}/stats` | GET | Get table statistics |
-| `/api/cdc/status` | GET | CDC pipeline sync status |
-| `/api/health` | GET | Health check endpoint |
+|-----------|---------|-------------|
+| `/api/auth/register` | POST | Create new account |
+| `/api/auth/login` | POST | Sign in |
+| `/api/auth/logout` | POST | Sign out |
+| `/api/auth/me` | GET | Get current user |
 
-# Authentication
-
+### Tables
 | Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/auth/register` | POST | Register new user |
-| `/api/auth/login` | POST | Login and get JWT token |
-| `/api/auth/refresh` | POST | Refresh access token |
-| `/api/auth/logout` | POST | Logout and revoke session |
-| `/api/auth/api-keys` | GET/POST | Manage API keys |
+|-----------|---------|-------------|
+| `/api/tables` | GET | List all tables |
+| `/api/tables/{table}/records` | GET | Get records |
+| `/api/tables/{table}/search` | GET | Search in table |
+| `/api/tables/{table}/schema` | GET | Get table schema |
 
-# Webhooks
-
+### Search
 | Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/webhook/telegram` | POST | Telegram bot webhook |
-| `/webhook/whatsapp` | GET/POST | WhatsApp bot webhook |
+|-----------|---------|-------------|
+| `/api/search` | GET | Global search |
+| `/api/search/duplicates` | GET | Search with duplicate detection |
 
-# 🎮 Use Cases & Real-World Scenarios
+### Reports
+| Endpoint | Method | Description |
+|-----------|---------|-------------|
+| `/api/reports` | GET | Generate report |
+| `/api/databases` | GET | List databases |
 
-# 1. Enterprise Data Portal
-Expose legacy PostgreSQL databases to modern web applications without writing custom APIs. L.S.D automatically handles schema changes—just add new tables or columns, and they're instantly available.
+### Intelligence (Optional)
+| Endpoint | Method | Description |
+|-----------|---------|-------------|
+| `/api/smart-search` | GET | AI-powered search |
+| `/api/entities/{id}/profile` | GET | Entity profile |
 
-# 2. AI Agent Integration
-Use API keys with scoped permissions to let AI agents search and retrieve data safely:
+See [API Documentation](docs/architecture.md) for complete endpoint list.
+
+---
+
+## 🏗️ Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        CLIENTS                              │
+│   (Web Browser, Mobile App, API Consumers, Bots)            │
+└─────────────────┬───────────────────────────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    ACID API SERVER                         │
+│  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐      │
+│  │  Auth        │ │  Rate Limit  │ │    Logger    │      │
+│  │  (JWT)       │ │  (Security) │ ��  (Logging)  │      │
+│  └──────────────┘ └──────────────┘ └──────────────┘      │
+│         │                                                 │
+│  ┌──────┴──────────────────────────────────────┐          │
+│  │           HANDLERS                          │          │
+│  │  ┌─────────┐ ┌─────────┐ ┌─────────┐       │          │
+│  │  │Dynamic  │ │Report   │ │Entity   │       │          │
+│  │  │Handler  │ │Handler  │ │Handler  │       │          │
+│  │  └─────────┘ └─────────┘ └─────────┘       │          │
+│  └──────┬──────────────────────────────────────┘          │
+│         │                                                 │
+│  ┌──────┴──────────────────────────────────────┐          │
+│  │              SERVICES                        │          │
+│  │  ┌──────────┐ ┌──────────┐ ┌──────────┐   │          │
+│  │  │ Schema   │ │Database │ │ Cache    │   │          │
+│  │  │Discovery│ │ Pool    │ │ (Redis)  │   │          │
+│  │  └──────────┘ └──────────┘ └──────────┘   │          │
+│  └──────┬──────────────────────────────────────┘          │
+└─────────┼───────────────────────────────────────────────────┘
+          │
+    ┌─────┴───────────────────────────────────────────────────┐
+    │                       DATABASES                            │
+    │  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐     │
+    │  │PostgreSQL   │ │ClickHouse    │ │   Redis      │     │
+    │  │(Main DB)    │ │(Search)      │ │(Cache)       │     │
+    │  └──────────────┘ └──────────────┘ └──────────────┘     │
+    └───────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🐳 Docker Commands
+
 ```bash
-curl -H "X-API-Key: lsd_live_your_key" \
-  "http://localhost:8080/api/tables/customers/search?q=john"
+# Start all services
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop all services
+docker-compose down
+
+# Rebuild containers
+docker-compose build
+
+# View running containers
+docker-compose ps
 ```
 
-# 3. Real-Time Analytics Dashboard
-Combine PostgreSQL's transactional integrity with ClickHouse's analytical speed. The CDC pipeline keeps search indexes fresh every 30 seconds.
+---
 
-# 4. Multi-Platform Bot Backend
-Serve Telegram and WhatsApp bots from the same API. Built-in command handlers for `/list`, `/search`, `/get`, and `/stats`.
+## 🛠️ Development
 
-# 5. Data Migration Tooling
-Use the dynamic API to extract data from any PostgreSQL database without writing migration scripts—perfect for ETL pipelines and data synchronization tasks.
+### Project Structure
 
-# 📖 Documentation
+```
+acid/
+├── cmd/api/              # Main application entry point
+├── internal/
+│   ├── auth/            # Authentication (JWT)
+│   ├── cache/           # Redis caching
+│   ├── clickhouse/      # ClickHouse integration
+│   ├── config/          # Configuration
+│   ├── database/        # Database connections
+│   ├── dbsearch/        # Entity search
+│   ├── handlers/        # HTTP request handlers
+│   ├── middleware/      # Security middleware
+│   ├── pipeline/        # Data processing
+│   └── schema/           # Schema discovery
+├── web/                  # Frontend (HTML/CSS/JS)
+│   ├── admin.html       # Admin panel
+│   ├── dashboard.html   # User dashboard
+│   └── style.css        # Styling
+├── databases/            # Database scripts
+├── docs/                 # Documentation
+├── scripts/             # Automation scripts
+└── docker-compose.yml   # Docker configuration
+```
 
-| Document | Description |
-|----------|-------------|
-| [Architecture Guide](docs/architecture.md) | Deep dive into system design and components |
-| [Setup Guide](docs/setup.md) | Detailed installation instructions |
-| [Configuration](docs/configuration.md) | Environment variables and options |
-| [Development Guide](docs/development.md) | Contributing and local development |
-| [Deployment Guide](docs/deployment.md) | Production deployment strategies |
-| [FAQ](docs/faq.md) | Frequently asked questions |
+### Important Files
 
-# 🛠️ Tech Stack
+| File | Purpose |
+|------|---------|
+| `cmd/api/main.go` | Main application - Don't modify unless adding features |
+| `internal/config/config.go` | Settings - Don't modify unless changing defaults |
+| `internal/database/pool.go` | Database connection - Don't modify |
+| `web/admin.html` | Admin panel - You can customize UI here |
+| `.env` | Your configuration - Edit this! |
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Go-00ADD8?style=flat-square&logo=go&logoColor=white" alt="Go"/>
-  <img src="https://img.shields.io/badge/PostgreSQL-336791?style=flat-square&logo=postgresql&logoColor=white" alt="PostgreSQL"/>
-  <img src="https://img.shields.io/badge/ClickHouse-FFCC00?style=flat-square&logo=clickhouse&logoColor=black" alt="ClickHouse"/>
-  <img src="https://img.shields.io/badge/Redis-DC382D?style=flat-square&logo=redis&logoColor=white" alt="Redis"/>
-  <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black" alt="JavaScript"/>
-  <img src="https://img.shields.io/badge/OpenAPI-6BA539?style=flat-square&logo=swagger&logoColor=white" alt="OpenAPI"/>
-</p>
+---
 
-| Component | Technology | Purpose |
-|-----------|------------|---------|
-| Backend | Go 1.24+ | High-performance API server |
-| Database | PostgreSQL 15+ | Primary data store |
-| Search Engine | ClickHouse | Full-text search acceleration |
-| Cache | Redis | Response caching layer |
-| Frontend | Vanilla JS + HTML | Web dashboard |
-| API Docs | OpenAPI 3.1 | Interactive documentation |
+## 📚 Documentation
 
+| Document | What It Covers |
+|----------|---------------|
+| [User Guide](docs/README-FOR-USERS.md) | How to use the Admin Panel |
+| [Architecture](docs/architecture.md) | System design and components |
+| [Configuration](docs/configuration.md) | All settings explained |
+| [Setup Guide](docs/setup.md) | Step-by-step installation |
+| [Development](docs/development.md) | For developers |
+| [Deployment](docs/deployment.md) | Production deployment |
 
+---
 
-# 🤝 Contributing
+## ❓ FAQ
 
-We welcome contributions! Here's how to get started:
+Common questions answered in [FAQ](docs/faq.md)
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+---
 
-Please read our [Development Guide](docs/development.md) for coding standards and best practices.
+## 🙏 Support
 
-# Contributors
-
-<a href="https://github.com/vinayyadav36">
-</a>
-
-
-
-# 💬 Community & Support
-
-- **Issues**: [GitHub Issues](https://github.com/vinayyadav36)
-- **Discussions**: [GitHub Discussions](https://linkedin.com/in/vinay-yadav-dev)
+- Issues: [GitHub Issues](https://github.com/Daveshvats/ACID/issues)
+- Discussions: [GitHub Discussions](https://github.com/Daveshvats/ACID/discussions)
 
 ---
 
 <div align="center">
 
-*Made with Time by the SH Team*
+**Built with ❤️ for easy database management**
 
-
-
-[⬆ Back to Top](#-lsd)
+[⬆ Back to Top](#acid---advanced-database-interface-system)
 
 </div>

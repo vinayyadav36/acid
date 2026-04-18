@@ -1,33 +1,50 @@
 version: '3.8'
 
+# =============================================================================
+# ACID - Advanced Database Interface System
+# Docker Compose Configuration
+# =============================================================================
+# 
+# Quick Start:
+#   docker-compose up -d
+# 
+# Services:
+#   - PostgreSQL (main database)
+#   - Redis (caching)
+#   - ClickHouse (fast search)
+#   - ACID API (main application)
+#   - PGAdmin (optional database admin UI)
+#   - Adminer (optional lightweight DB admin)
+# =============================================================================
+
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: lsd-postgres
+    container_name: acid-postgres
     environment:
-      POSTGRES_USER: lsd
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: lsd
+      POSTGRES_USER: acid
+      POSTGRES_PASSWORD: acid_password
+      POSTGRES_DB: acid
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./databases:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U lsd"]
+      test: ["CMD-SHELL", "pg_isready -U acid"]
       interval: 5s
       timeout: 5s
       retries: 5
     networks:
-      - lsd-network
+      - acid-network
 
   postgres-replica:
     image: postgres:16-alpine
-    container_name: lsd-postgres-replica
+    container_name: acid-postgres-replica
     environment:
-      POSTGRES_USER: lsd
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: lsd
+      POSTGRES_USER: acid
+      POSTGRES_PASSWORD: acid_password
+      POSTGRES_DB: acid
     ports:
       - "5433:5432"
     command: >
@@ -38,11 +55,11 @@ services:
       postgres:
         condition: service_healthy
     networks:
-      - lsd-network
+      - acid-network
 
   redis:
     image: redis:7-alpine
-    container_name: lsd-redis
+    container_name: acid-redis
     command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
     ports:
       - "6379:6379"
@@ -54,13 +71,13 @@ services:
       timeout: 3s
       retries: 5
     networks:
-      - lsd-network
+      - acid-network
 
   clickhouse:
     image: clickhouse/clickhouse-server:24.3-alpine
-    container_name: lsd-clickhouse
+    container_name: acid-clickhouse
     environment:
-      CLICKHOUSE_DB: lsd
+      CLICKHOUSE_DB: acid
       CLICKHOUSE_USER: default
       CLICKHOUSE_PASSWORD: ""
       CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
@@ -80,24 +97,25 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - lsd-network
+      - acid-network
 
   api:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: lsd-api
+    container_name: acid-api
     environment:
       PORT: 8080
-      DATABASE_URL: postgres://lsd:password@postgres:5432/lsd
-      READ_REPLICA_DSN: postgres://lsd:password@postgres-replica:5432/lsd
+      DATABASE_URL: postgres://acid:acid_password@postgres:5432/acid
+      READ_REPLICA_DSN: postgres://acid:acid_password@postgres-replica:5432/acid
       REDIS_ADDR: redis:6379
       CLICKHOUSE_ADDR: clickhouse:9000
-      CLICKHOUSE_DB: lsd
+      CLICKHOUSE_DB: acid
       CLICKHOUSE_USER: default
       CLICKHOUSE_PASSWORD: ""
       ENABLE_CDC: "true"
-      JWT_SECRET: lsd-jwt-secret-key-change-in-production
+      ENABLE_DB_SEARCH: "true"
+      JWT_SECRET: acid-jwt-secret-key-change-in-production
     ports:
       - "8080:8080"
     depends_on:
@@ -113,16 +131,16 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - lsd-network
+      - acid-network
     restart: unless-stopped
 
   generator:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: lsd-generator
+    container_name: acid-generator
     environment:
-      DATABASE_URL: postgres://lsd:password@postgres:5432/lsd
+      DATABASE_URL: postgres://acid:acid_password@postgres:5432/acid
       NUM_DATABASES: 10
       TABLES_PER_DB: 1000
       USERS_PER_TABLE: 50
@@ -133,13 +151,13 @@ services:
       postgres:
         condition: service_healthy
     networks:
-      - lsd-network
+      - acid-network
 
   pgadmin:
     image: dpage/pgadmin4:8
-    container_name: lsd-pgadmin
+    container_name: acid-pgadmin
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@lsd.local
+      PGADMIN_DEFAULT_EMAIL: admin@acid.local
       PGADMIN_DEFAULT_PASSWORD: admin
     ports:
       - "5050:80"
@@ -148,17 +166,17 @@ services:
     depends_on:
       - postgres
     networks:
-      - lsd-network
+      - acid-network
 
   adminer:
     image: adminer:4.8-alpine
-    container_name: lsd-adminer
+    container_name: acid-adminer
     ports:
       - "8081:8080"
     depends_on:
       - postgres
     networks:
-      - lsd-network
+      - acid-network
 
 volumes:
   postgres_data:
@@ -168,6 +186,6 @@ volumes:
   pgadmin_data:
 
 networks:
-  lsd-network:
+  acid-network:
     driver: bridge
-    name: lsd-network
+    name: acid-network
