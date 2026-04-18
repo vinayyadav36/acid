@@ -224,8 +224,8 @@ func generateTableData(ctx context.Context, pool *pgxpool.Pool, dbName, tableNam
 	duplicateChance := 0.15
 
 	for i := 0; i < numRecords; i++ {
-		firstName := firstNames[randInt(len(firstNames))]
-		lastName := lastNames[randInt(len(lastNames))]
+		firstName := firstNames[randIntMax(len(firstNames))]
+		lastName := lastNames[randIntMax(len(lastNames))]
 		email := generateEmail(firstName, lastName, dbIdx, tableIdx, i)
 
 		record := UserRecord{
@@ -235,18 +235,18 @@ func generateTableData(ctx context.Context, pool *pgxpool.Pool, dbName, tableNam
 			FirstName: firstName,
 			LastName:  lastName,
 			Phone:     generatePhone(),
-			Status:    statuses[randInt(len(statuses))],
-			Country:   countries[randInt(len(countries))],
-			City:      cities[randInt(len(cities))],
-			Domain:    domains2[randInt(len(domains2))],
-			JobTitle:  jobTitles[randInt(len(jobTitles))],
-			CreatedAt: time.Now().Add(-time.Duration(randInt(365*24)) * time.Hour),
+			Status:    statuses[randIntMax(len(statuses))],
+			Country:   countries[randIntMax(len(countries))],
+			City:      cities[randIntMax(len(cities))],
+			Domain:    domains2[randIntMax(len(domains2))],
+			JobTitle:  jobTitles[randIntMax(len(jobTitles))],
+			CreatedAt: time.Now().Add(-time.Duration(randIntMax(365*24)) * time.Hour),
 			UpdatedAt: time.Now(),
 		}
 
 		if randFloat() < duplicateChance {
-			refDB := randInt(NumDatabases) + 1
-			refTbl := randInt(NumTablesPerDB)
+			refDB := randIntMax(NumDatabases) + 1
+			refTbl := randIntMax(NumTablesPerDB)
 			record.Tags = []string{fmt.Sprintf("duplicate_ref:lsd_db_%02d.users_%04d", refDB, refTbl)}
 			record.DuplicateDB = fmt.Sprintf("lsd_db_%02d", refDB)
 			record.DuplicateTable = fmt.Sprintf("users_%04d", refTbl)
@@ -275,7 +275,7 @@ func generateTableData(ctx context.Context, pool *pgxpool.Pool, dbName, tableNam
 }
 
 func generateEmail(firstName, lastName string, dbIdx, tableIdx, recordIdx int) string {
-	domain := domains[randInt(len(domains))]
+	domain := domains[randIntMax(len(domains))]
 	unique := fmt.Sprintf("%s%d.%s%d", firstName[:1], recordIdx, lastName[:1], dbIdx)
 	return strings.ToLower(unique) + "@" + domain
 }
@@ -287,13 +287,13 @@ func generateUUID() string {
 }
 
 func generatePhone() string {
-	return fmt.Sprintf("+1-%d-%03d-%04d",
+	return fmt.Sprintf("+1-%03d-%03d-%04d",
 		randRange(200, 999),
 		randRange(100, 999),
 		randRange(1000, 9999))
 }
 
-func randInt(max int) int {
+func randIntMax(max int) int {
 	n, _ := rand.Int(rand.Reader, big.NewInt(int64(max)))
 	return int(n.Int64())
 }
