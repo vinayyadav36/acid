@@ -27,7 +27,7 @@ func NewCategoryHandler(db *sql.DB) *CategoryHandler {
 
 // List categories - GET /api/categories
 func (h *CategoryHandler) ListCategories(w http.ResponseWriter, r *http.Request) {
-	entityType := r.URL.Query()..Get("entity_type")
+	entityType := r.URL.Query().Get("entity_type")
 	
 	query := `
 		SELECT id, name, description, color, entity_type, icon, created_at, updated_at, created_by, is_active

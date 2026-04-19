@@ -90,6 +90,38 @@ func main() {
 	log.Printf("✅ Schema loaded: %d tables discovered", len(registry.GetAllTables()))
 
 	// ============================================================================
+	// STEP 4b: ENSURE CATEGORY SYSTEM TABLES EXIST
+	// ============================================================================
+	_, err = pool.Pool.Exec(ctx, `
+		CREATE TABLE IF NOT EXISTS categories (
+			id SERIAL PRIMARY KEY,
+			name VARCHAR(100) NOT NULL UNIQUE,
+			description TEXT,
+			color VARCHAR(20) DEFAULT '#3b82f6',
+			entity_type VARCHAR(50) NOT NULL DEFAULT 'employee',
+			icon VARCHAR(50),
+			created_at TIMESTAMP DEFAULT NOW(),
+			updated_at TIMESTAMP DEFAULT NOW(),
+			created_by INTEGER REFERENCES users(id),
+			is_active BOOLEAN DEFAULT true
+		);
+		CREATE TABLE IF NOT EXISTS entity_categories (
+			id SERIAL PRIMARY KEY,
+			entity_type VARCHAR(50) NOT NULL,
+			entity_id INTEGER NOT NULL,
+			category_id INTEGER NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
+			assigned_at TIMESTAMP DEFAULT NOW(),
+			assigned_by INTEGER REFERENCES users(id),
+			UNIQUE(entity_type, entity_id, category_id)
+		);
+	`)
+	if err != nil {
+		log.Printf("⚠️  Category tables creation warning: %v", err)
+	} else {
+		log.Println("✅ Category system tables ensured")
+	}
+
+	// ============================================================================
 	// STEP 5: CONNECT TO CLICKHOUSE (SEARCH ENGINE)
 	// ============================================================================
 	chPool, err := clickhouse.NewConnectionPool(clickhouse.Config{
@@ -305,6 +337,15 @@ func main() {
 	mux.Handle("GET /api/system-report", authMiddleware.RequireAuth(http.HandlerFunc(reportHandler.GenerateSystemReport)))
 	mux.Handle("GET /api/crossref", authMiddleware.RequireAuth(http.HandlerFunc(reportHandler.GetCrossRef)))
 
+	log.Println("✅ Multi-DB manager initialized")
+	log.Println("📊 Report generation endpoints enabled")
+
+	// ============================================================================
+	// STEP 12: SET UP CATEGORY SYSTEM (MUST be before routes)
+	// ============================================================================
+	categoryHandler := handlers.NewCategoryHandler(pool.Pool)
+	log.Println("✅ Category system initialized")
+
 	// ============================================================================
 	// CATEGORY MANAGEMENT SYSTEM
 	// ============================================================================
@@ -321,16 +362,7 @@ func main() {
 	mux.Handle("GET /api/categories/entity/{entity_type}/{entity_id}", authMiddleware.RequireAuth(http.HandlerFunc(categoryHandler.GetEntityCategories)))
 	mux.Handle("GET /api/categories/{id}/entities", authMiddleware.RequireAuth(http.HandlerFunc(categoryHandler.GetCategoryEntities)))
 
-	log.Println("✅ Multi-DB manager initialized")
-	log.Println("📊 Report generation endpoints enabled")
-
-	// ============================================================================
-	// STEP 12: SET UP CATEGORY SYSTEM
-	// ============================================================================
-	categoryHandler := handlers.NewCategoryHandler(pool.Pool)
-	log.Println("✅ Category system initialized")
-
-	// Intelligent Search (dbsearch)
+	log.Println("🏷️ Category API routes registered")
 	mux.Handle("GET /api/smart-search", authMiddleware.RequireAuth(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if entityHandler == nil {
 			http.Error(w, `{"error":"search not enabled"}`, http.StatusNotImplemented)
@@ -407,7 +439,7 @@ func main() {
 	})))
 
 	// ============================================================================
-	// STEP 12: SET UP MIDDLEWARE CHAIN
+	// STEP 13: SET UP MIDDLEWARE CHAIN
 	// ============================================================================
 	handler := middleware.RateLimiter(mux)
 	handler = middleware.CORS(handler)
