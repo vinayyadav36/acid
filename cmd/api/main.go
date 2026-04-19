@@ -29,16 +29,16 @@ import (
 	"time"
 
 	// OUR INTERNAL PACKAGES
-	"acid/internal/auth"          // JWT authentication
-	"acid/internal/cache"        // Redis caching layer
-	"acid/internal/clickhouse"  // ClickHouse search engine
-	"acid/internal/config"      // Configuration loading
+	"acid/internal/auth"       // JWT authentication
+	"acid/internal/cache"      // Redis caching layer
+	"acid/internal/clickhouse" // ClickHouse search engine
+	"acid/internal/config"     // Configuration loading
 	"acid/internal/database"   // Database connections
-	"acid/internal/dbsearch"  // Entity search intelligence
-	"acid/internal/handlers"  // HTTP request handlers
+	"acid/internal/dbsearch"   // Entity search intelligence
+	"acid/internal/handlers"   // HTTP request handlers
 	"acid/internal/middleware" // Security & rate limiting
-	"acid/internal/pipeline"  // Data processing
-	"acid/internal/schema"   // Schema discovery
+	"acid/internal/pipeline"   // Data processing
+	"acid/internal/schema"     // Schema discovery
 
 	// EXTERNAL PACKAGES
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -268,9 +268,21 @@ func main() {
 	mux.HandleFunc("GET /docs", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "./web/docs.html")
 	})
+	mux.HandleFunc("GET /labs/hadoop-review", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "./web/isolated/hadoop-review/index.html")
+	})
 
 	// Public API
 	mux.HandleFunc("GET /api/info", apiHandler.GetAPIInfo)
+	mux.HandleFunc("GET /api/private/nosql/hadoop-review", func(w http.ResponseWriter, r *http.Request) {
+		payload, err := os.ReadFile("./databases/private_nosql/hadoop_review.json")
+		if err != nil {
+			http.Error(w, `{"error":"private json data unavailable"}`, http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(payload)
+	})
 	mux.HandleFunc("POST /api/auth/register", authHandler.Register)
 	mux.HandleFunc("POST /api/auth/login", authHandler.Login)
 
@@ -289,6 +301,7 @@ func main() {
 		http.ServeFile(w, r, "./web/app.js")
 	})
 	mux.Handle("GET /assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("./web/assets"))))
+	mux.Handle("GET /labs/hadoop-review/static/", http.StripPrefix("/labs/hadoop-review/static/", http.FileServer(http.Dir("./web/isolated/hadoop-review"))))
 
 	// ==========================
 	// PROTECTED ROUTES (require authentication)
