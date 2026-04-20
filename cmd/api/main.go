@@ -35,6 +35,7 @@ import (
 	"acid/internal/config"     // Configuration loading
 	"acid/internal/database"   // Database connections
 	"acid/internal/dbsearch"   // Entity search intelligence
+	"acid/internal/hadoop"
 	"acid/internal/handlers"   // HTTP request handlers
 	"acid/internal/middleware" // Security & rate limiting
 	"acid/internal/pipeline"   // Data processing
@@ -192,6 +193,8 @@ func main() {
 	}
 
 	pipelineHandler := handlers.NewPipelineHandler(pipelineProcessor)
+	hadoopService := hadoop.NewService()
+	hadoopHandler := handlers.NewHadoopHandler(hadoopService)
 
 	// ============================================================================
 	// STEP 9: SET UP DB-SEARCH (ENTITY INTELLIGENCE)
@@ -333,6 +336,11 @@ func main() {
 	mux.Handle("GET /api/pipeline/jobs/{job_id}", authMiddleware.RequireAuth(http.HandlerFunc(pipelineHandler.GetJobStatus)))
 	mux.Handle("GET /api/pipeline/jobs/{job_id}/stream", authMiddleware.RequireAuth(http.HandlerFunc(pipelineHandler.StreamJobProgress)))
 	mux.Handle("GET /api/pipeline/jobs/{job_id}/logs", authMiddleware.RequireAuth(http.HandlerFunc(pipelineHandler.GetJobLogs)))
+
+	// Hadoop essentials (NameNode, DataNode, SecondaryNameNode, MapReduce, Sqoop)
+	mux.Handle("GET /api/hadoop/cluster", authMiddleware.RequireAuth(http.HandlerFunc(hadoopHandler.GetCluster)))
+	mux.Handle("POST /api/hadoop/mapreduce/wordcount", authMiddleware.RequireAuth(http.HandlerFunc(hadoopHandler.RunWordCount)))
+	mux.Handle("POST /api/hadoop/sqoop/plan", authMiddleware.RequireAuth(http.HandlerFunc(hadoopHandler.BuildSqoopPlan)))
 
 	// CDC Status
 	mux.Handle("GET /api/cdc/status", authMiddleware.RequireAuth(http.HandlerFunc(dynamicHandler.GetCDCStatus)))

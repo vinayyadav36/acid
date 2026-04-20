@@ -7,7 +7,7 @@
 [![Go Version](https://img.shields.io/badge/Go-1.24+-00ADD8?style=for-the-badge&logo=go)](https://go.dev/)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
-[🚀 Quick Start](#quick-start) · [📖 User Guide](docs/README-FOR-USERS.md) · [⚙️ Configuration](docs/configuration.md) · [🎮 Demo](#features)
+[🚀 Quick Start](#quick-start) · [⚙️ Configuration](#️-configuration) · [🧠 Hadoop Essentials](#-hadoop-essentials) · [🎮 Demo](#features)
 
 </div>
 
@@ -153,7 +153,7 @@ ENABLE_CDC=true
 ENABLE_DB_SEARCH=true
 ```
 
-See [Configuration Guide](docs/configuration.md) for all options.
+This README is the single consolidated guide for setup, run, configuration, and operations.
 
 ---
 
@@ -193,7 +193,14 @@ See [Configuration Guide](docs/configuration.md) for all options.
 | `/api/smart-search` | GET | AI-powered search |
 | `/api/entities/{id}/profile` | GET | Entity profile |
 
-See [API Documentation](docs/architecture.md) for complete endpoint list.
+### Hadoop Essentials
+| Endpoint | Method | Description |
+|-----------|---------|-------------|
+| `/api/hadoop/cluster` | GET | NameNode/DataNode/Secondary NameNode status snapshot |
+| `/api/hadoop/mapreduce/wordcount` | POST | Run parallel word-count MapReduce |
+| `/api/hadoop/sqoop/plan` | POST | Build Sqoop import/export execution plan |
+
+Use this README for complete endpoint references.
 
 ---
 
@@ -277,6 +284,7 @@ acid/
 │   ├── database/        # Database connections
 │   ├── dbsearch/        # Entity search
 │   ├── handlers/        # HTTP request handlers
+│   ├── hadoop/          # Hadoop essentials service (HDFS/MapReduce/Sqoop planning)
 │   ├── middleware/      # Security middleware
 │   ├── pipeline/        # Data processing
 │   └── schema/           # Schema discovery
@@ -285,7 +293,6 @@ acid/
 │   ├── dashboard.html   # User dashboard
 │   └── style.css        # Styling
 ├── databases/            # Database scripts
-├── docs/                 # Documentation
 ├── scripts/             # Automation scripts
 └── docker-compose.yml   # Docker configuration
 ```
@@ -302,22 +309,28 @@ acid/
 
 ---
 
-## 📚 Documentation
+## 🧠 Hadoop Essentials
 
-| Document | What It Covers |
-|----------|---------------|
-| [User Guide](docs/README-FOR-USERS.md) | How to use the Admin Panel |
-| [Architecture](docs/architecture.md) | System design and components |
-| [Configuration](docs/configuration.md) | All settings explained |
-| [Setup Guide](docs/setup.md) | Step-by-step installation |
-| [Development](docs/development.md) | For developers |
-| [Deployment](docs/deployment.md) | Production deployment |
+ACID now includes integrated Hadoop building blocks:
 
----
+- **NameNode** state model (namespace/cluster/checkpoint metadata)
+- **DataNode** health and capacity snapshot
+- **Secondary NameNode** checkpoint tracking
+- **MapReduce** essentials endpoint for parallel word count processing
+- **Sqoop** essentials endpoint for import/export command planning
 
-## ❓ FAQ
+### Sqoop request payload example
 
-Common questions answered in [FAQ](docs/faq.md)
+```json
+{
+  "direction": "import",
+  "source": "jdbc:postgresql://localhost:5432/acid",
+  "target": "/acid/raw/customers",
+  "table": "customers",
+  "split_by": "id",
+  "mappers": 4
+}
+```
 
 ---
 
