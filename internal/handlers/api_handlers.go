@@ -35,6 +35,9 @@ func (h *APIHandler) GetAPIInfo(w http.ResponseWriter, r *http.Request) {
 			"GET /api/search",
 			"GET /api/search/",
 			"GET /api/cdc/status",
+			"GET /api/hadoop/cluster",
+			"POST /api/hadoop/mapreduce/wordcount",
+			"POST /api/hadoop/sqoop/plan",
 		},
 	}
 
