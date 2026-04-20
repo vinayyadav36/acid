@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"acid/internal/hadoop"
@@ -54,5 +55,7 @@ func (h *HadoopHandler) BuildSqoopPlan(w http.ResponseWriter, r *http.Request) {
 func writeJSONResponse(w http.ResponseWriter, status int, payload interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	_ = json.NewEncoder(w).Encode(payload)
+	if err := json.NewEncoder(w).Encode(payload); err != nil {
+		log.Printf("failed to write JSON response: %v", err)
+	}
 }

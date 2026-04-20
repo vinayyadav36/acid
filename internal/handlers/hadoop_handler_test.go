@@ -34,3 +34,19 @@ func TestBuildSqoopPlanRejectsBadPayload(t *testing.T) {
 		t.Fatalf("expected 400, got %d", rec.Code)
 	}
 }
+
+func TestBuildSqoopPlanSuccess(t *testing.T) {
+	handler := NewHadoopHandler(hadoop.NewService())
+	reqBody := `{"direction":"import","source":"jdbc:postgresql://localhost:5432/acid","target":"/acid/raw/customers","table":"customers","split_by":"id","mappers":4}`
+	req := httptest.NewRequest(http.MethodPost, "/api/hadoop/sqoop/plan", strings.NewReader(reqBody))
+	rec := httptest.NewRecorder()
+
+	handler.BuildSqoopPlan(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d", rec.Code)
+	}
+	body := rec.Body.String()
+	if !strings.Contains(body, `"direction":"import"`) || !strings.Contains(body, `"command":"sqoop import`) {
+		t.Fatalf("unexpected response body: %s", body)
+	}
+}

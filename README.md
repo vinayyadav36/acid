@@ -13,6 +13,19 @@
 
 ---
 
+## 📌 Contents
+
+- [What is ACID?](#-what-is-acid)
+- [Features](#-features)
+- [Quick Start](#-quick-start)
+- [Configuration](#️-configuration)
+- [API Endpoints](#-api-endpoints)
+- [Hadoop Essentials](#-hadoop-essentials)
+- [Architecture](#️-architecture)
+- [Development](#️-development)
+
+---
+
 ## 📋 What is ACID?
 
 **ACID (Advanced Database Interface System)** is a powerful system that gives you a beautiful web interface to manage your PostgreSQL database - without writing any code!

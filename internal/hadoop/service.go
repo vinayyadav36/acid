@@ -2,11 +2,28 @@ package hadoop
 
 import (
 	"errors"
+	"fmt"
 	"sort"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
+)
+
+var tokenReplacer = strings.NewReplacer(
+	".", " ",
+	",", " ",
+	";", " ",
+	":", " ",
+	"!", " ",
+	"?", " ",
+	"(", " ",
+	")", " ",
+	"[", " ",
+	"]", " ",
+	"{", " ",
+	"}", " ",
+	"\n", " ",
+	"\t", " ",
 )
 
 type NameNode struct {
@@ -73,6 +90,8 @@ type Service struct {
 	cluster ClusterSnapshot
 }
 
+const maxMapReduceWorkers = 32
+
 func NewService() *Service {
 	now := time.Now().UTC()
 	return &Service{
@@ -118,6 +137,9 @@ func (s *Service) RunWordCount(text string, workers int) WordCountResult {
 	if workers <= 0 {
 		workers = 2
 	}
+	if workers > maxMapReduceWorkers {
+		workers = maxMapReduceWorkers
+	}
 
 	tokens := tokenize(text)
 	if len(tokens) == 0 {
@@ -143,7 +165,7 @@ func (s *Service) RunWordCount(text string, workers int) WordCountResult {
 		wg.Add(1)
 		go func(slice []string) {
 			defer wg.Done()
-			m := make(map[string]int, len(slice))
+			m := make(map[string]int)
 			for _, token := range slice {
 				m[token]++
 			}
@@ -156,7 +178,7 @@ func (s *Service) RunWordCount(text string, workers int) WordCountResult {
 		close(out)
 	}()
 
-	counts := make(map[string]int, len(tokens))
+	counts := make(map[string]int)
 	for part := range out {
 		for k, v := range part {
 			counts[k] += v
@@ -205,9 +227,24 @@ func (s *Service) BuildSqoopPlan(req SqoopPlanRequest) (SqoopPlan, error) {
 	base := "sqoop"
 	var cmd string
 	if direction == "import" {
-		cmd = base + " import --connect \"" + req.Source + "\" --table \"" + req.Table + "\" --target-dir \"" + req.Target + "\" --split-by \"" + req.SplitBy + "\" --num-mappers " + intToString(req.Mappers)
+		cmd = fmt.Sprintf(
+			`%s import --connect "%s" --table "%s" --target-dir "%s" --split-by "%s" --num-mappers %d`,
+			base,
+			req.Source,
+			req.Table,
+			req.Target,
+			req.SplitBy,
+			req.Mappers,
+		)
 	} else {
-		cmd = base + " export --connect \"" + req.Target + "\" --table \"" + req.Table + "\" --export-dir \"" + req.Source + "\" --num-mappers " + intToString(req.Mappers)
+		cmd = fmt.Sprintf(
+			`%s export --connect "%s" --table "%s" --export-dir "%s" --num-mappers %d`,
+			base,
+			req.Target,
+			req.Table,
+			req.Source,
+			req.Mappers,
+		)
 	}
 
 	return SqoopPlan{
@@ -222,37 +259,10 @@ func (s *Service) BuildSqoopPlan(req SqoopPlanRequest) (SqoopPlan, error) {
 }
 
 func tokenize(text string) []string {
-	replacer := strings.NewReplacer(
-		".", " ",
-		",", " ",
-		";", " ",
-		":", " ",
-		"!", " ",
-		"?", " ",
-		"(", " ",
-		")", " ",
-		"[", " ",
-		"]", " ",
-		"{", " ",
-		"}", " ",
-		"\n", " ",
-		"\t", " ",
-	)
-	cleaned := strings.ToLower(replacer.Replace(text))
+	cleaned := strings.ToLower(tokenReplacer.Replace(text))
 	fields := strings.Fields(cleaned)
 	if len(fields) == 0 {
 		return nil
 	}
 	return fields
-}
-
-func intToString(v int) string {
-	return strconv.Itoa(v)
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
 }
