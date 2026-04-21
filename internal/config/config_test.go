@@ -6,6 +6,7 @@ func TestLoadConfigUsesEnvironmentValues(t *testing.T) {
 	t.Setenv("PORT", "9090")
 	t.Setenv("DATABASE_URL", "postgresql://user:pass@localhost:5432/testdb?sslmode=disable")
 	t.Setenv("READ_REPLICA_DSN", "postgresql://replica:pass@localhost:5432/testdb?sslmode=disable")
+	t.Setenv("ADMIN_DB_STORAGE_PATH", "/tmp/admin-databases")
 	t.Setenv("REDIS_ADDR", "redis:6379")
 	t.Setenv("REDIS_PASSWORD", "secret")
 	t.Setenv("REDIS_DB", "3")
@@ -27,6 +28,9 @@ func TestLoadConfigUsesEnvironmentValues(t *testing.T) {
 	}
 	if cfg.ReadReplicaDSN != "postgresql://replica:pass@localhost:5432/testdb?sslmode=disable" {
 		t.Fatalf("unexpected replica dsn: %q", cfg.ReadReplicaDSN)
+	}
+	if cfg.AdminDBStoragePath != "/tmp/admin-databases" {
+		t.Fatalf("unexpected admin db storage path: %q", cfg.AdminDBStoragePath)
 	}
 	if cfg.RedisAddr != "redis:6379" || cfg.RedisPassword != "secret" || cfg.RedisDB != 3 {
 		t.Fatalf("unexpected redis settings: %+v", cfg)

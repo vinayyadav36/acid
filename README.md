@@ -148,6 +148,9 @@ PORT=8080
 # Database (Required)
 DATABASE_URL=postgres://user:password@host:5432/dbname
 
+# Admin database file workspace (optional)
+ADMIN_DB_STORAGE_PATH=./databases/admin_storage
+
 # Redis (Optional - for caching)
 REDIS_ADDR=localhost:6379
 REDIS_PASSWORD=
@@ -167,6 +170,14 @@ ENABLE_DB_SEARCH=true
 ```
 
 This README is the single consolidated guide for setup, run, configuration, and operations.
+
+### Windows one-click startup
+
+- Backend only: `scripts\start-backend.bat`
+- Frontend only: `scripts\start-frontend.bat`
+- Full stack: `scripts\start-fullstack.bat`
+
+The startup scripts auto-read `PORT` from `.env`, wait for `/api/health`, and open the correct localhost URL.
 
 ---
 

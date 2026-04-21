@@ -13,6 +13,7 @@ type Config struct {
 	Port               string
 	DatabaseURL        string
 	ReadReplicaDSN     string
+	AdminDBStoragePath string
 	RedisAddr          string
 	RedisPassword      string
 	RedisDB            int
@@ -37,6 +38,7 @@ func LoadConfig() *Config {
 		Port:               getEnv("PORT", "8080"),
 		DatabaseURL:        getEnv("DATABASE_URL", "postgres://postgres:password@localhost:5432/postgres?sslmode=disable"),
 		ReadReplicaDSN:     getEnv("READ_REPLICA_DSN", ""),
+		AdminDBStoragePath: getEnv("ADMIN_DB_STORAGE_PATH", "./databases/admin_storage"),
 		RedisAddr:          getEnv("REDIS_ADDR", "localhost:6379"),
 		RedisPassword:      getEnv("REDIS_PASSWORD", ""),
 		RedisDB:            getEnvAsInt("REDIS_DB", 0),

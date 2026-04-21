@@ -637,6 +637,24 @@
                         </tbody>
                     </table>
                 </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">📁 Admin Database Storage</h2>
+                    </div>
+                    <p class="text-secondary" id="database-storage-root" style="margin-bottom: 1rem;">Storage root: -</p>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Folder</th>
+                                <th>Path</th>
+                                <th>Files</th>
+                            </tr>
+                        </thead>
+                        <tbody id="database-storage-body">
+                            <tr><td colspan="3" class="loading">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- Reports Section -->
@@ -781,6 +799,7 @@
         let currentSection = 'dashboard';
         let tables = [];
         let databases = [];
+        let databaseStorage = { root: '', folders: [] };
         let currentUser = null;
         let authToken = localStorage.getItem('acid_token');
 
@@ -1012,9 +1031,14 @@
         // ========================================
         async function loadDatabases() {
             try {
-                const data = await apiCall('/api/databases');
+                const [data, storage] = await Promise.all([
+                    apiCall('/api/databases'),
+                    apiCall('/api/admin/database-storage')
+                ]);
                 databases = data.databases || [];
+                databaseStorage = storage || { root: '', folders: [] };
                 renderDatabases();
+                renderDatabaseStorage();
             } catch (e) {
                 showToast('Error loading databases', 'error');
             }
@@ -1031,6 +1055,26 @@
                     <td>
                         <button class="btn btn-secondary" onclick="syncDatabase('${db.name}')">Sync</button>
                     </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderDatabaseStorage() {
+            const rootEl = document.getElementById('database-storage-root');
+            const tbody = document.getElementById('database-storage-body');
+            rootEl.textContent = `Storage root: ${databaseStorage.root || '-'}`;
+
+            const folders = databaseStorage.folders || [];
+            if (folders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" class="loading">No storage folders found.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = folders.map(folder => `
+                <tr>
+                    <td><strong>${folder.name}</strong></td>
+                    <td>${folder.path}</td>
+                    <td>${folder.file_count || 0}</td>
                 </tr>
             `).join('');
         }

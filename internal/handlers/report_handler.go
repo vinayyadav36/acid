@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -23,22 +25,70 @@ type ReportHandler struct {
 	cache       *cache.MultiLayerCache
 	chSearch    *chpkg.SearchRepository
 	multiDB     *database.MultiDBManager
+	storageRoot string
 	maxPageSize int
 	defaultSize int
 	timeout     time.Duration
 }
 
-func NewReportHandler(repo *database.DynamicRepository, registry *schema.SchemaRegistry, multiDB *database.MultiDBManager) *ReportHandler {
+func NewReportHandler(repo *database.DynamicRepository, registry *schema.SchemaRegistry, multiDB *database.MultiDBManager, storageRoot string) *ReportHandler {
 	return &ReportHandler{
 		repo:        repo,
 		registry:    registry,
 		cache:       nil,
 		chSearch:    nil,
 		multiDB:     multiDB,
+		storageRoot: storageRoot,
 		maxPageSize: 1000,
 		defaultSize: 20,
 		timeout:     30 * time.Second,
 	}
+}
+
+func (h *ReportHandler) GetDatabaseStorageSummary(w http.ResponseWriter, r *http.Request) {
+	root, err := filepath.Abs(h.storageRoot)
+	if err != nil {
+		h.writeError(w, http.StatusInternalServerError, "Failed to resolve storage path")
+		return
+	}
+
+	entries, err := os.ReadDir(root)
+	if err != nil {
+		h.writeError(w, http.StatusInternalServerError, "Failed to read storage folder")
+		return
+	}
+
+	folders := make([]map[string]interface{}, 0, len(entries))
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			continue
+		}
+
+		folderPath := filepath.Join(root, entry.Name())
+		files, err := os.ReadDir(folderPath)
+		if err != nil {
+			continue
+		}
+
+		fileCount := 0
+		for _, f := range files {
+			if !f.IsDir() {
+				fileCount++
+			}
+		}
+
+		folders = append(folders, map[string]interface{}{
+			"name":       entry.Name(),
+			"path":       folderPath,
+			"file_count": fileCount,
+		})
+	}
+
+	h.writeJSON(w, http.StatusOK, map[string]interface{}{
+		"root":        root,
+		"folders":     folders,
+		"folder_count": len(folders),
+	})
 }
 
 func (h *ReportHandler) GenerateReport(w http.ResponseWriter, r *http.Request) {
