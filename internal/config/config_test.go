@@ -7,6 +7,12 @@ func TestLoadConfigUsesEnvironmentValues(t *testing.T) {
 	t.Setenv("DATABASE_URL", "postgresql://user:pass@localhost:5432/testdb?sslmode=disable")
 	t.Setenv("READ_REPLICA_DSN", "postgresql://replica:pass@localhost:5432/testdb?sslmode=disable")
 	t.Setenv("ADMIN_DB_STORAGE_PATH", "/tmp/admin-databases")
+	t.Setenv("SEARCH_BACKEND", "opensearch")
+	t.Setenv("ANALYTICS_LAKE", "object_storage_spark")
+	t.Setenv("ELASTICSEARCH_URL", "http://elasticsearch:9200")
+	t.Setenv("OPENSEARCH_URL", "http://opensearch:9200")
+	t.Setenv("ANALYTICS_LAKE_URI", "s3://analytics-lake")
+	t.Setenv("SPARK_MASTER_URL", "spark://spark-master:7077")
 	t.Setenv("REDIS_ADDR", "redis:6379")
 	t.Setenv("REDIS_PASSWORD", "secret")
 	t.Setenv("REDIS_DB", "3")
@@ -31,6 +37,18 @@ func TestLoadConfigUsesEnvironmentValues(t *testing.T) {
 	}
 	if cfg.AdminDBStoragePath != "/tmp/admin-databases" {
 		t.Fatalf("unexpected admin db storage path: %q", cfg.AdminDBStoragePath)
+	}
+	if cfg.SearchBackend != "opensearch" {
+		t.Fatalf("unexpected search backend: %q", cfg.SearchBackend)
+	}
+	if cfg.AnalyticsLake != "object_storage_spark" {
+		t.Fatalf("unexpected analytics lake mode: %q", cfg.AnalyticsLake)
+	}
+	if cfg.ElasticsearchURL != "http://elasticsearch:9200" || cfg.OpenSearchURL != "http://opensearch:9200" {
+		t.Fatalf("unexpected search urls: %+v", cfg)
+	}
+	if cfg.AnalyticsLakeURI != "s3://analytics-lake" || cfg.SparkMasterURL != "spark://spark-master:7077" {
+		t.Fatalf("unexpected analytics lake settings: %+v", cfg)
 	}
 	if cfg.RedisAddr != "redis:6379" || cfg.RedisPassword != "secret" || cfg.RedisDB != 3 {
 		t.Fatalf("unexpected redis settings: %+v", cfg)
