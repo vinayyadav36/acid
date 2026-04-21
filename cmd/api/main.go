@@ -154,6 +154,8 @@ func main() {
 		registry,
 		multiCache,
 		chSearch,
+		cfg.SearchBackend,
+		cfg.AnalyticsLake,
 		50, 20,
 		120*time.Second,
 	)
@@ -201,7 +203,7 @@ func main() {
 	// STEP 9: SET UP DB-SEARCH (ENTITY INTELLIGENCE)
 	// ============================================================================
 	entityRepo := database.NewEntityRepository(pool.Pool)
-	apiHandler := handlers.NewAPIHandler()
+	apiHandler := handlers.NewAPIHandler(cfg.SearchBackend, cfg.AnalyticsLake)
 
 	var adminSearchHandler *handlers.AdminSearchHandler
 	var entityHandler *handlers.EntityHandler

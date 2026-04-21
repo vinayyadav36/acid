@@ -85,8 +85,8 @@ func (h *ReportHandler) GetDatabaseStorageSummary(w http.ResponseWriter, r *http
 	}
 
 	h.writeJSON(w, http.StatusOK, map[string]interface{}{
-		"root":        root,
-		"folders":     folders,
+		"root":         root,
+		"folders":      folders,
 		"folder_count": len(folders),
 	})
 }

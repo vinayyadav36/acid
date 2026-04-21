@@ -16,6 +16,18 @@ set BASE_URL=http://localhost:%PORT%
 set MAX_RETRIES=30
 set RETRY=0
 
+where docker >nul 2>nul
+if %ERRORLEVEL% equ 0 (
+    pushd "%ROOT%" >nul
+    docker compose up -d >nul 2>nul
+    if %ERRORLEVEL% equ 0 (
+        echo [INFO] Docker dependencies started.
+    ) else (
+        echo [WARN] Docker dependencies were not started (continuing).
+    )
+    popd >nul
+)
+
 echo [INFO] Starting backend window ...
 start "L.S.D Backend" cmd /k "cd /d ""%ROOT%"" && call ""%~dp0start-backend.bat"""
 
