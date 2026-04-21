@@ -1,8 +1,8 @@
 # =============================================================================
-# L.S.D Dockerfile - Multi-stage Production Build
+# ACID Dockerfile - Multi-stage Production Build
 # =============================================================================
-# Build: docker build -t lsd-api:latest .
-# Run: docker run -p 8080:8080 lsd-api:latest
+# Build: docker build -t acid-api:latest .
+# Run: docker run -p 8080:8080 acid-api:latest
 # =============================================================================
 
 # -----------------------------------------------------------------------------
@@ -38,7 +38,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build \
               -X main.version=${VERSION} \
               -X main.commit=${COMMIT} \
               -X main.date=${DATE}" \
-    -o /build/lsd-api \
+    -o /build/acid-api \
     ./cmd/api
 
 # -----------------------------------------------------------------------------
@@ -51,7 +51,7 @@ COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
 
 # Copy the binary
-COPY --from=builder /build/lsd-api /lsd-api
+COPY --from=builder /build/acid-api /acid-api
 
 # Copy web assets
 COPY --from=builder /build/web /web
@@ -62,12 +62,12 @@ USER nonroot:nonroot
 # Expose port
 EXPOSE 8080
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD ["/lsd-api", "-health-check"] || exit 1
+# Health check - use native Go binary health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+    CMD ["/bin/sh", "-c", "nc -z localhost 8080 || exit 1"]
 
 # Set entrypoint
-ENTRYPOINT ["/lsd-api"]
+ENTRYPOINT ["/acid-api"]
 
 # Default arguments
 CMD ["--port", "8080"]

@@ -470,7 +470,7 @@ func main() {
 	})))
 
 	// ============================================================================
-	// STEP 13: SET UP MIDDLEWARE CHAIN
+	// STEP 14: SET UP MIDDLEWARE CHAIN
 	// ============================================================================
 	handler := middleware.RateLimiter(mux)
 	handler = middleware.CORS(handler)
@@ -479,7 +479,7 @@ func main() {
 	handler = middleware.Recovery(handler)
 
 	// ============================================================================
-	// STEP 13: START SERVER
+	// STEP 15: START SERVER
 	// ============================================================================
 	server := &http.Server{
 		Addr:              fmt.Sprintf(":%s", cfg.Port),
