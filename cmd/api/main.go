@@ -25,6 +25,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 	"time"
 
@@ -153,6 +154,8 @@ func main() {
 		registry,
 		multiCache,
 		chSearch,
+		cfg.SearchBackend,
+		cfg.AnalyticsLake,
 		50, 20,
 		120*time.Second,
 	)
@@ -200,7 +203,7 @@ func main() {
 	// STEP 9: SET UP DB-SEARCH (ENTITY INTELLIGENCE)
 	// ============================================================================
 	entityRepo := database.NewEntityRepository(pool.Pool)
-	apiHandler := handlers.NewAPIHandler()
+	apiHandler := handlers.NewAPIHandler(cfg.SearchBackend, cfg.AnalyticsLake)
 
 	var adminSearchHandler *handlers.AdminSearchHandler
 	var entityHandler *handlers.EntityHandler
@@ -352,8 +355,15 @@ func main() {
 	}
 	multiDBManager.SetPrimaryDB("primary")
 
-	reportHandler := handlers.NewReportHandler(dynamicRepo, registry, multiDBManager)
+	if err := os.MkdirAll(cfg.AdminDBStoragePath, 0o755); err != nil {
+		log.Printf("⚠️  Failed to ensure admin DB storage path (%s): %v", cfg.AdminDBStoragePath, err)
+	}
+	_ = os.MkdirAll(filepath.Join(cfg.AdminDBStoragePath, "incoming"), 0o755)
+	_ = os.MkdirAll(filepath.Join(cfg.AdminDBStoragePath, "archive"), 0o755)
+
+	reportHandler := handlers.NewReportHandler(dynamicRepo, registry, multiDBManager, cfg.AdminDBStoragePath)
 	mux.Handle("GET /api/databases", authMiddleware.RequireAuth(http.HandlerFunc(reportHandler.ListDatabases)))
+	mux.Handle("GET /api/admin/database-storage", authMiddleware.RequireAuth(http.HandlerFunc(reportHandler.GetDatabaseStorageSummary)))
 	mux.Handle("GET /api/reports", authMiddleware.RequireAuth(http.HandlerFunc(reportHandler.GenerateReport)))
 	mux.Handle("GET /api/system-report", authMiddleware.RequireAuth(http.HandlerFunc(reportHandler.GenerateSystemReport)))
 	mux.Handle("GET /api/crossref", authMiddleware.RequireAuth(http.HandlerFunc(reportHandler.GetCrossRef)))

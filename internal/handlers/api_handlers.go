@@ -5,16 +5,26 @@ import (
 	"net/http"
 )
 
-type APIHandler struct{}
+type APIHandler struct {
+	searchBackend string
+	analyticsLake string
+}
 
-func NewAPIHandler() *APIHandler {
-	return &APIHandler{}
+func NewAPIHandler(searchBackend, analyticsLake string) *APIHandler {
+	return &APIHandler{
+		searchBackend: searchBackend,
+		analyticsLake: analyticsLake,
+	}
 }
 
 func (h *APIHandler) GetAPIInfo(w http.ResponseWriter, r *http.Request) {
 	info := map[string]interface{}{
 		"name":    "Dynamic Database API",
 		"version": "2.0",
+		"capabilities": map[string]interface{}{
+			"search_backend": h.searchBackend,
+			"analytics_lake": h.analyticsLake,
+		},
 		"endpoints": []string{
 			"GET /health",
 			"GET /api/health",

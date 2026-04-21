@@ -148,6 +148,19 @@ PORT=8080
 # Database (Required)
 DATABASE_URL=postgres://user:password@host:5432/dbname
 
+# Admin database file workspace (optional)
+ADMIN_DB_STORAGE_PATH=./databases/admin_storage
+
+# Search backend options: clickhouse | elasticsearch | opensearch
+SEARCH_BACKEND=clickhouse
+ELASTICSEARCH_URL=
+OPENSEARCH_URL=
+
+# Analytics lake options: hdfs | object_storage_spark
+ANALYTICS_LAKE=hdfs
+ANALYTICS_LAKE_URI=
+SPARK_MASTER_URL=
+
 # Redis (Optional - for caching)
 REDIS_ADDR=localhost:6379
 REDIS_PASSWORD=
@@ -167,6 +180,14 @@ ENABLE_DB_SEARCH=true
 ```
 
 This README is the single consolidated guide for setup, run, configuration, and operations.
+
+### Windows one-click startup
+
+- Backend only: `scripts\start-backend.bat`
+- Frontend only: `scripts\start-frontend.bat`
+- Full stack: `scripts\start-fullstack.bat`
+
+The full-stack startup scripts attempt to start Docker dependencies first (`docker compose up -d`), auto-read `PORT` from `.env`, wait for `/api/health`, and open the correct localhost URL.
 
 ---
 

@@ -5,7 +5,9 @@ REM  Double-click this file or run from cmd.exe to start the server.
 REM  Prerequisites: Go 1.22+ installed, PostgreSQL running, .env configured.
 REM ═══════════════════════════════════════════════════════════════════════════
 
-setlocal
+setlocal EnableExtensions
+set ROOT=%~dp0..
+pushd "%ROOT%" >nul
 
 REM ── Configuration ────────────────────────────────────────────────────────────
 set APP_NAME=lsd-server
@@ -43,7 +45,7 @@ if exist .env (
 
 REM ── Build ─────────────────────────────────────────────────────────────────────
 echo [INFO] Building L.S.D ...
-go build -o %BINARY% ./cmd/api
+go build -o "%BINARY%" ./cmd/api
 if %ERRORLEVEL% neq 0 (
     echo [ERROR] Build failed. Check the output above.
     pause
@@ -57,10 +59,10 @@ echo [INFO] Press Ctrl+C to stop.
 echo.
 
 :loop
-echo [%date% %time%] Starting server ... >> %LOG_FILE%
-%BINARY% >> %LOG_FILE% 2>&1
+echo [%date% %time%] Starting server ... >> "%LOG_FILE%"
+"%BINARY%" >> "%LOG_FILE%" 2>&1
 set EXIT_CODE=%ERRORLEVEL%
-echo [%date% %time%] Server exited with code %EXIT_CODE% >> %LOG_FILE%
+echo [%date% %time%] Server exited with code %EXIT_CODE% >> "%LOG_FILE%"
 if %EXIT_CODE% neq 0 (
     echo [WARN] Server crashed (code %EXIT_CODE%). Restarting in 5 seconds ...
     timeout /t 5 /nobreak >nul
@@ -68,4 +70,5 @@ if %EXIT_CODE% neq 0 (
 )
 echo [INFO] Server stopped cleanly.
 pause
+popd >nul
 endlocal

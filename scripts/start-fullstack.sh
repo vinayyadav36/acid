@@ -17,6 +17,17 @@ echo "│   ◆ BACKEND + FRONTEND  L.S.D Full-Stack Launcher        │"
 echo "└──────────────────────────────────────────────────────────┘"
 echo ""
 
+# Start Docker dependencies (best-effort)
+if command -v docker >/dev/null 2>&1; then
+    if docker compose version >/dev/null 2>&1; then
+        echo "[INFO] Starting Docker dependencies with docker compose ..."
+        (cd "$SCRIPT_DIR/.." && docker compose up -d) || echo "[WARN] docker compose failed, continuing with local startup"
+    elif command -v docker-compose >/dev/null 2>&1; then
+        echo "[INFO] Starting Docker dependencies with docker-compose ..."
+        (cd "$SCRIPT_DIR/.." && docker-compose up -d) || echo "[WARN] docker-compose failed, continuing with local startup"
+    fi
+fi
+
 # Start backend in background using the hardened start script
 bash "$SCRIPT_DIR/start-backend.sh" --daemon
 

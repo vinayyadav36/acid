@@ -29,32 +29,36 @@ import (
 	"time"
 
 	// INTERNAL IMPORTS - Our own modules
-	"acid/internal/cache"         // Redis caching
+	"acid/internal/cache"            // Redis caching
 	chpkg "acid/internal/clickhouse" // ClickHouse search
-	"acid/internal/database"    // Database operations
-	"acid/internal/schema"     // Schema discovery
+	"acid/internal/database"         // Database operations
+	"acid/internal/schema"           // Schema discovery
 )
 
 type DynamicHandler struct {
-	repo        *database.DynamicRepository
-	registry    *schema.SchemaRegistry
-	cache       *cache.MultiLayerCache
-	chSearch    *chpkg.SearchRepository
-	cdcManager  *chpkg.CDCManager
-	maxPageSize int
-	defaultSize int
-	timeout     time.Duration
+	repo          *database.DynamicRepository
+	registry      *schema.SchemaRegistry
+	cache         *cache.MultiLayerCache
+	chSearch      *chpkg.SearchRepository
+	cdcManager    *chpkg.CDCManager
+	searchBackend string
+	analyticsLake string
+	maxPageSize   int
+	defaultSize   int
+	timeout       time.Duration
 }
 
-func NewDynamicHandler(repo *database.DynamicRepository, registry *schema.SchemaRegistry, cache *cache.MultiLayerCache, chSearch *chpkg.SearchRepository, maxPageSize, defaultSize int, timeout time.Duration) *DynamicHandler {
+func NewDynamicHandler(repo *database.DynamicRepository, registry *schema.SchemaRegistry, cache *cache.MultiLayerCache, chSearch *chpkg.SearchRepository, searchBackend, analyticsLake string, maxPageSize, defaultSize int, timeout time.Duration) *DynamicHandler {
 	return &DynamicHandler{
-		repo:        repo,
-		registry:    registry,
-		cache:       cache,
-		chSearch:    chSearch,
-		maxPageSize: maxPageSize,
-		defaultSize: defaultSize,
-		timeout:     timeout,
+		repo:          repo,
+		registry:      registry,
+		cache:         cache,
+		chSearch:      chSearch,
+		searchBackend: searchBackend,
+		analyticsLake: analyticsLake,
+		maxPageSize:   maxPageSize,
+		defaultSize:   defaultSize,
+		timeout:       timeout,
 	}
 }
 
@@ -396,8 +400,8 @@ func (h *DynamicHandler) findAllDuplicateReferences(records []map[string]interfa
 					seenPairs[key] = true
 					refs = append(refs, map[string]interface{}{
 						"ref_database": dupDB,
-						"ref_table":   dupTable,
-						"ref_type":    "duplicate",
+						"ref_table":    dupTable,
+						"ref_type":     "duplicate",
 					})
 				}
 			}
@@ -470,15 +474,15 @@ func (h *DynamicHandler) SearchGlobalWithDuplicates(w http.ResponseWriter, r *ht
 	duplicateRefs := h.findAllDuplicateReferences(allRecords)
 
 	h.writeJSONCompressed(w, r, http.StatusOK, map[string]interface{}{
-		"results":            resultsByTable,
-		"total_results":    totalResults,
-		"tables_searched":  len(resultsByTable),
+		"results":         resultsByTable,
+		"total_results":   totalResults,
+		"tables_searched": len(resultsByTable),
 		"has_duplicates":  len(duplicateRefs) > 0,
-		"duplicate_refs": duplicateRefs,
+		"duplicate_refs":  duplicateRefs,
 		"search_time_ms":  time.Since(startTime).Milliseconds(),
-		"query":          query,
-		"limit":         limit,
-		"search_engine":  "postgresql_with_crossref",
+		"query":           query,
+		"limit":           limit,
+		"search_engine":   "postgresql_with_crossref",
 	})
 }
 
@@ -564,12 +568,14 @@ func (h *DynamicHandler) HealthCheck(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("X-Layer", "backend")
 
 	h.writeJSON(w, http.StatusOK, map[string]interface{}{
-		"status":       "UP",
-		"service":      "L.S.D",
-		"layer":        "backend",
-		"tables_count": len(tables),
-		"clickhouse":   clickhouseAvailable,
-		"redis":        h.cache.IsAvailable(),
+		"status":         "UP",
+		"service":        "L.S.D",
+		"layer":          "backend",
+		"tables_count":   len(tables),
+		"clickhouse":     clickhouseAvailable,
+		"redis":          h.cache.IsAvailable(),
+		"search_backend": h.searchBackend,
+		"analytics_lake": h.analyticsLake,
 	})
 }
 

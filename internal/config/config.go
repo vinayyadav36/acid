@@ -13,6 +13,13 @@ type Config struct {
 	Port               string
 	DatabaseURL        string
 	ReadReplicaDSN     string
+	AdminDBStoragePath string
+	SearchBackend      string
+	AnalyticsLake      string
+	ElasticsearchURL   string
+	OpenSearchURL      string
+	AnalyticsLakeURI   string
+	SparkMasterURL     string
 	RedisAddr          string
 	RedisPassword      string
 	RedisDB            int
@@ -37,6 +44,13 @@ func LoadConfig() *Config {
 		Port:               getEnv("PORT", "8080"),
 		DatabaseURL:        getEnv("DATABASE_URL", "postgres://postgres:password@localhost:5432/postgres?sslmode=disable"),
 		ReadReplicaDSN:     getEnv("READ_REPLICA_DSN", ""),
+		AdminDBStoragePath: getEnv("ADMIN_DB_STORAGE_PATH", "./databases/admin_storage"),
+		SearchBackend:      getEnv("SEARCH_BACKEND", "clickhouse"),
+		AnalyticsLake:      getEnv("ANALYTICS_LAKE", "hdfs"),
+		ElasticsearchURL:   getEnv("ELASTICSEARCH_URL", ""),
+		OpenSearchURL:      getEnv("OPENSEARCH_URL", ""),
+		AnalyticsLakeURI:   getEnv("ANALYTICS_LAKE_URI", ""),
+		SparkMasterURL:     getEnv("SPARK_MASTER_URL", ""),
 		RedisAddr:          getEnv("REDIS_ADDR", "localhost:6379"),
 		RedisPassword:      getEnv("REDIS_PASSWORD", ""),
 		RedisDB:            getEnvAsInt("REDIS_DB", 0),
