@@ -29,7 +29,8 @@ if %ERRORLEVEL% equ 0 (
 )
 
 echo [INFO] Starting backend window ...
-start "L.S.D Backend" cmd /k "cd /d ""%ROOT%"" && call ""%~dp0start-backend.bat"""
+set BACKEND_CMD=cd /d "%ROOT%" ^&^& call "%~dp0start-backend.bat"
+start "L.S.D Backend" cmd /k "%BACKEND_CMD%"
 
 echo [INFO] Waiting for backend health endpoint ...
 :wait_loop

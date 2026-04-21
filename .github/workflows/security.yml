@@ -111,7 +111,6 @@ jobs:
               sys.exit(1)
           print("::notice::govulncheck completed (stdlib-only findings reported as warnings)")
           PY
-          cp vulncheck-output.json vulncheck-output.txt
         continue-on-error: false
 
       - name: Upload vulncheck results
@@ -119,7 +118,7 @@ jobs:
         if: always()
         with:
           name: vulncheck-results
-          path: vulncheck-output.txt
+          path: vulncheck-output.json
           retention-days: 30
 
   # ===========================================================================
