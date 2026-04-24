@@ -447,6 +447,7 @@
         .modal-entity{max-width:860px;width:95vw;max-height:90vh;overflow-y:auto;}
         .modal-body-inner{padding:0 1.5rem 1.5rem;}
         .text-center{text-align:center;}
+        .initially-hidden{display:none;}
     </style>
 </head>
 <body>
@@ -583,7 +584,7 @@
             </div>
 
             <!-- ── Smart Search ────────────────────────────────────── -->
-            <div id="panel-smart-search" class="intel-panel card" style="display:none;">
+            <div id="panel-smart-search" class="intel-panel card initially-hidden">
                 <div class="card-header">
                     <div class="card-title"><div class="card-icon">🧠</div> Smart Intelligence Search</div>
                 </div>
@@ -604,7 +605,7 @@
             </div>
 
             <!-- ── Cases ──────────────────────────────────────────── -->
-            <div id="panel-cases" class="intel-panel card" style="display:none;">
+            <div id="panel-cases" class="intel-panel card initially-hidden">
                 <div class="card-header">
                     <div class="card-title"><div class="card-icon">📁</div> Cases</div>
                     <div class="card-header-row">
@@ -623,7 +624,7 @@
             </div>
 
             <!-- ── Work Sessions ───────────────────────────────────── -->
-            <div id="panel-sessions" class="intel-panel card" style="display:none;">
+            <div id="panel-sessions" class="intel-panel card initially-hidden">
                 <div class="card-header">
                     <div class="card-title"><div class="card-icon">⏱️</div> Work Sessions</div>
                     <button class="btn btn-primary btn-sm" onclick="startWorkSession()">+ Start Session</button>
@@ -636,7 +637,7 @@
     </main>
 
     <!-- Entity Profile Modal -->
-    <div class="modal-overlay" id="entity-modal" style="display:none;" onclick="if(event.target===this)closeEntityModal()">
+    <div class="modal-overlay initially-hidden" id="entity-modal" onclick="if(event.target===this)closeEntityModal()">
         <div class="modal modal-entity">
             <div class="modal-header">
                 <h3 class="modal-title" id="entity-modal-name">Entity Profile</h3>

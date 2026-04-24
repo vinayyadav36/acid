@@ -14,7 +14,7 @@ Usage:
     python3 scripts/analytics.py --report audit   --days 7
 
 Requirements (all stdlib + psycopg2 only — no cloud, no external services):
-    pip install psycopg2-binary python-dotenv
+    pip install -r requirements.txt
 """
 
 import argparse
@@ -28,7 +28,7 @@ try:
     import psycopg2
     import psycopg2.extras
 except ImportError:
-    sys.exit("[ERROR] psycopg2 not installed.  Run:  pip install psycopg2-binary")
+    sys.exit("[ERROR] psycopg2 not installed.  Run:  pip install -r requirements.txt")
 
 try:
     from dotenv import load_dotenv
