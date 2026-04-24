@@ -427,7 +427,26 @@
             padding:.6rem 0;border-bottom:1px solid var(--border);gap:.5rem;flex-wrap:wrap;}
         .session-dot{width:8px;height:8px;border-radius:50%;background:#10b981;flex-shrink:0;}
         .session-dot.ended{background:#6b7280;}
-        }
+        /* ── Utility / layout helpers ─────────────────────────────────── */
+        #intel-console{margin-top:2rem;}
+        .btn-signout{margin-top:1.5rem;}
+        .card-header-actions{display:flex;gap:.5rem;align-items:center;}
+        .card-header-row{display:flex;gap:.5rem;}
+        .modal-btn-row{display:flex;gap:.5rem;margin-top:.5rem;}
+        .select-sm{width:140px;padding:.4rem .6rem;font-size:.85rem;}
+        .select-md{width:160px;padding:.4rem .6rem;font-size:.85rem;}
+        .search-row{display:flex;gap:.75rem;margin-bottom:1rem;flex-wrap:wrap;}
+        .search-row-query{display:flex;gap:.75rem;margin-bottom:1rem;}
+        .input-sm{width:140px;}
+        .input-xs{width:130px;}
+        .input-md-w{width:150px;}
+        .input-lg-w{width:200px;}
+        .input-flex{flex:1;}
+        .search-status{font-size:.8rem;color:var(--text-muted);margin-bottom:.5rem;}
+        .panel-desc{color:var(--text-muted);font-size:.9rem;margin-bottom:1rem;}
+        .modal-entity{max-width:860px;width:95vw;max-height:90vh;overflow-y:auto;}
+        .modal-body-inner{padding:0 1.5rem 1.5rem;}
+        .text-center{text-align:center;}
     </style>
 </head>
 <body>
@@ -496,7 +515,7 @@
                     </div>
                 </div>
 
-                <button class="btn btn-secondary w-full" style="margin-top: 1.5rem;" onclick="logout()">
+                <button class="btn btn-secondary w-full btn-signout" onclick="logout()">
                     Sign Out
                 </button>
             </div>
@@ -524,7 +543,7 @@
              All sections collapse/expand via the tab bar.
              JS is in app.js — no inline scripts.
              ═══════════════════════════════════════════════════════════ -->
-        <div id="intel-console" style="margin-top:2rem;">
+        <div id="intel-console">
 
             <!-- Tab bar -->
             <div class="intel-tabs" id="intel-tab-bar">
@@ -538,8 +557,8 @@
             <div id="panel-db-search" class="intel-panel active card">
                 <div class="card-header">
                     <div class="card-title"><div class="card-icon">🗄️</div> Database Search Console</div>
-                    <div style="display:flex;gap:.5rem;align-items:center;">
-                        <select id="db-scope" class="form-input" style="width:140px;padding:.4rem .6rem;font-size:.85rem;">
+                    <div class="card-header-actions">
+                        <select id="db-scope" class="form-input select-sm" title="Search scope">
                             <option value="database">Full DB Scan</option>
                             <option value="column">Column Scan</option>
                             <option value="row">Single Table</option>
@@ -548,18 +567,18 @@
                     </div>
                 </div>
 
-                <div style="display:flex;gap:.75rem;margin-bottom:1rem;flex-wrap:wrap;">
-                    <input id="db-source-input" class="form-input" style="width:140px" placeholder="Data source ID">
-                    <input id="db-schema-input" class="form-input" style="width:130px" placeholder="Schema (row only)">
-                    <input id="db-table-input"  class="form-input" style="width:150px" placeholder="Table  (row only)">
+                <div class="search-row">
+                    <input id="db-source-input" class="form-input input-sm" placeholder="Data source ID">
+                    <input id="db-schema-input" class="form-input input-xs" placeholder="Schema (row only)">
+                    <input id="db-table-input"  class="form-input input-md-w" placeholder="Table  (row only)">
                 </div>
 
-                <div style="display:flex;gap:.75rem;margin-bottom:1rem;">
-                    <input id="db-search-q" class="form-input" placeholder="Search term — keyword / Aadhaar / PAN / phone / email …" style="flex:1">
+                <div class="search-row-query">
+                    <input id="db-search-q" class="form-input input-flex" placeholder="Search term — keyword / Aadhaar / PAN / phone / email …">
                     <button class="btn btn-primary" onclick="runDBSearch()">Search</button>
                 </div>
 
-                <div id="db-search-status" style="font-size:.8rem;color:var(--text-muted);margin-bottom:.5rem;"></div>
+                <div id="db-search-status" class="search-status"></div>
                 <div id="db-search-results"></div>
             </div>
 
@@ -568,19 +587,19 @@
                 <div class="card-header">
                     <div class="card-title"><div class="card-icon">🧠</div> Smart Intelligence Search</div>
                 </div>
-                <p style="color:var(--text-muted);font-size:.9rem;margin-bottom:1rem;">
+                <p class="panel-desc">
                     Auto-detects Aadhaar, PAN, Passport, Driving Licence, Phone, Email, or Bank Account
                     and builds the optimal search plan.
                 </p>
-                <div style="display:flex;gap:.75rem;margin-bottom:1rem;flex-wrap:wrap;">
-                    <input id="smart-q" class="form-input" placeholder="Type anything — number, name, email, ID …" style="flex:1">
-                    <select id="smart-scope" class="form-input" style="width:160px;padding:.4rem .6rem;font-size:.85rem;">
+                <div class="search-row">
+                    <input id="smart-q" class="form-input input-flex" placeholder="Type anything — number, name, email, ID …">
+                    <select id="smart-scope" class="form-input select-md" title="Smart search scope">
                         <option value="database">All Databases</option>
                         <option value="column">Column Scan</option>
                     </select>
                     <button class="btn btn-primary" onclick="runSmartSearch()">Search</button>
                 </div>
-                <div id="smart-search-status" style="font-size:.8rem;color:var(--text-muted);margin-bottom:.5rem;"></div>
+                <div id="smart-search-status" class="search-status"></div>
                 <div id="smart-search-results"></div>
             </div>
 
@@ -588,9 +607,9 @@
             <div id="panel-cases" class="intel-panel card" style="display:none;">
                 <div class="card-header">
                     <div class="card-title"><div class="card-icon">📁</div> Cases</div>
-                    <div style="display:flex;gap:.5rem;">
-                        <input id="case-q" class="form-input" style="width:200px" placeholder="Search cases …">
-                        <select id="case-status" class="form-input" style="width:140px;padding:.4rem .6rem;font-size:.85rem;">
+                    <div class="card-header-row">
+                        <input id="case-q" class="form-input input-lg-w" placeholder="Search cases …">
+                        <select id="case-status" class="form-input select-sm" title="Filter by status">
                             <option value="">All Statuses</option>
                             <option value="open">Open</option>
                             <option value="under_investigation">Under Investigation</option>
@@ -618,16 +637,16 @@
 
     <!-- Entity Profile Modal -->
     <div class="modal-overlay" id="entity-modal" style="display:none;" onclick="if(event.target===this)closeEntityModal()">
-        <div class="modal" style="max-width:860px;width:95vw;max-height:90vh;overflow-y:auto;">
+        <div class="modal modal-entity">
             <div class="modal-header">
                 <h3 class="modal-title" id="entity-modal-name">Entity Profile</h3>
-                <div style="display:flex;gap:.5rem;margin-top:.5rem;">
+                <div class="modal-btn-row">
                     <button class="btn btn-secondary btn-sm" onclick="exportEntity('json')">⬇ JSON</button>
                     <button class="btn btn-secondary btn-sm" onclick="exportEntity('csv')">⬇ CSV</button>
                     <button class="btn btn-secondary btn-sm" onclick="closeEntityModal()">✕ Close</button>
                 </div>
             </div>
-            <div class="modal-body" id="entity-modal-body" style="padding:0 1.5rem 1.5rem;">
+            <div class="modal-body modal-body-inner" id="entity-modal-body">
                 Loading …
             </div>
         </div>
@@ -661,7 +680,7 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">Rate Limit (requests/minute)</label>
-                    <input type="number" id="key-rate-limit" class="form-input" value="5000" min="1" max="50000">
+                    <input type="number" id="key-rate-limit" class="form-input" title="Rate limit (requests per minute)" value="5000" min="1" max="50000">
                     <p class="form-hint">AI agents: up to 50,000/min</p>
                 </div>
             </div>
@@ -675,7 +694,7 @@
     <!-- Show Key Modal -->
     <div class="modal-overlay" id="show-key-modal">
         <div class="modal">
-            <div class="modal-header" style="text-align: center;">
+            <div class="modal-header text-center">
                 <h3 class="modal-title">🎉 API Key Created!</h3>
                 <p class="modal-subtitle">Copy your key now - it won't be shown again</p>
             </div>

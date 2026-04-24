@@ -1,15 +1,11 @@
 # 🔬 ACID - Advanced Database Interface System
 
-<div align="center">
-
-**A production-grade, high-performance API that automatically adapts to any PostgreSQL database**
+A production-grade, high-performance API that automatically adapts to any PostgreSQL database
 
 [![Go Version](https://img.shields.io/badge/Go-1.24+-00ADD8?style=for-the-badge&logo=go)](https://go.dev/)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
-[🚀 Quick Start](#quick-start) · [⚙️ Configuration](#️-configuration) · [🧠 Hadoop Essentials](#-hadoop-essentials) · [🎮 Demo](#features)
-
-</div>
+[🚀 Quick Start](#-quick-start) · [⚙️ Configuration](#️-configuration) · [🧠 Hadoop Essentials](#-hadoop-essentials) · [🎮 Demo](#-features)
 
 ---
 
