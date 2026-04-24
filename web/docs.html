@@ -92,6 +92,7 @@
             height: 56px;
             background: rgba(15, 15, 15, 0.95);
             backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             align-items: center;
@@ -201,6 +202,7 @@
             bottom: 0;
             background: rgba(0, 0, 0, 0.8);
             backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -464,6 +466,11 @@
                 margin: 0.5rem;
             }
         }
+        /* ── Utility helpers ─────────────────────────────────────────── */
+        .role-badge-ml{margin-left:.5rem;}
+        .btn-accent{background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;}
+        .modal-header-center{text-align:center;}
+        .modal-title-center{justify-content:center;}
     </style>
 </head>
 <body>
@@ -473,7 +480,7 @@
             <a href="/" class="logo">
                 <div class="logo-icon">ACID</div>
                 <span class="logo-text">ACID</span>
-                <span class="role-badge role-badge-frontend" style="margin-left:.5rem" title="UI served by Go backend from web/">
+                <span class="role-badge role-badge-frontend role-badge-ml" title="UI served by Go backend from web/">
                     <span class="role-badge-dot"></span>Frontend
                 </span>
             </a>
@@ -521,7 +528,7 @@
                     </div>
                     <div class="quick-actions">
                         <a href="/dashboard" target="_blank">
-                            <button type="button" style="background: linear-gradient(135deg, #f97316, #ea580c); color: #fff;">🔐 Create API Key</button>
+                            <button type="button" class="btn-accent">🔐 Create API Key</button>
                         </a>
                         <button type="button" onclick="setDemoKey()">Test Format Only</button>
                     </div>
@@ -542,9 +549,9 @@
 
             <!-- Success State -->
             <div id="modal-success" style="display: none;">
-                <div class="modal-header" style="text-align: center;">
+                <div class="modal-header modal-header-center">
                     <div class="success-icon">✓</div>
-                    <h2 class="modal-title" style="justify-content: center;">
+                    <h2 class="modal-title modal-title-center">
                         API Key Configured
                     </h2>
                     <p class="modal-subtitle">

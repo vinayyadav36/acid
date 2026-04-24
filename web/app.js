@@ -468,7 +468,7 @@ function intelTab(name) {
     document.querySelectorAll('.intel-panel').forEach(p => p.style.display = 'none');
     document.querySelectorAll('.intel-tab').forEach(t => t.classList.remove('active'));
     const panel = document.getElementById('panel-' + name);
-    if (panel) panel.style.display = '';
+    if (panel) panel.style.display = 'block';
     event.currentTarget.classList.add('active');
     // Lazy-load data on first open
     if (name === 'cases')    loadCases();
